@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused hint color -->
+    <item android:color="#FF6A00" android:state_focused="true"/>
+    <!-- Default/unfocused hint color -->
+    <item android:color="#9CA3AF"/>
+</selector>

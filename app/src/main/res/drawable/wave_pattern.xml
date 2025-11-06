@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="343dp"
+    android:viewportWidth="512"
+    android:viewportHeight="343">
+
+    <!-- Background -->
+    <path
+        android:fillColor="#FFFF"
+        android:pathData="M0,0h512v343h-512z" />
+
+    <!-- Curved light-blue top section with a pointier right end -->
+    <path
+        android:fillColor="#C7EEFF"
+        android:pathData="
+            M0,0
+            H512
+            V240
+            C512,240 470,150 330,180
+            C220,200 120,205 60,190
+            C30,182 10,170 0,150
+            Z" />
+</vector>
