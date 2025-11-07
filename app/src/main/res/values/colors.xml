@@ -27,4 +27,15 @@
 
     <color name="bottom_nav_background">#F8F9FA</color>
     <color name="orange_ripple">#33FF5722</color>
+
+    <color name="gray_900">#1F2937</color>
+    <color name="gray_400">#6B7280</color>
+    <color name="blue_600">#2563EB</color>
+
+    <!-- Gray shades -->
+    <color name="gray_200">#E5E7EB</color>
+    <color name="gray_600">#6B7280</color>
+
+    <!-- Red shades -->
+    <color name="red_600">#EF4444</color>
 </resources>

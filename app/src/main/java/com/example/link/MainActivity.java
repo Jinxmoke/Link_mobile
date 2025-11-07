@@ -24,7 +24,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ✅ System UI setup (transparent nav with light icons)
+        setupSystemUI();
+        setupBottomNavInsets();
+        loadDefaultFragment(savedInstanceState);
+        loadBottomNavigation();
+        setupNotificationSheet();
+    }
+
+    private void setupSystemUI() {
         Window window = getWindow();
         window.setNavigationBarColor(Color.parseColor("#F5F7FA"));
 
@@ -45,42 +52,40 @@ public class MainActivity extends AppCompatActivity {
             flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             window.getDecorView().setSystemUiVisibility(flags);
         }
+    }
 
-        // ✅ Ensure bottom nav adjusts with insets
+    private void setupBottomNavInsets() {
         View rootView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
             int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-
             View bottomNav = findViewById(R.id.bottomNavContainer);
             if (bottomNav != null) {
                 bottomNav.setPadding(0, 0, 0, bottomInset);
             }
-
             return insets;
         });
+    }
 
-        // ✅ Load the default Home fragment
+    private void loadDefaultFragment(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mapContainer, new HomeFragment())
                 .commit();
         }
+    }
 
-        // ✅ Load bottom navigation (only for rescuer user type)
-        String userType = getIntent().getStringExtra("userType");
-        if ("rescuer".equals(userType)) {
-            getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.bottomNavContainer, new BottomNavigationFragment())
-                .commit();
-        }
+    private void loadBottomNavigation() {
+        // Always show bottom navigation regardless of userType
+        getSupportFragmentManager()
+            .beginTransaction()
+            .replace(R.id.bottomNavContainer, new BottomNavigationFragment())
+            .commit();
+    }
 
-        // ✅ Setup Notification Bottom Sheet
+    private void setupNotificationSheet() {
         notificationSheetView = findViewById(R.id.notificationBottomSheet);
-
         if (notificationSheetView != null) {
-            // Hide immediately before layout pass
             notificationSheetView.setVisibility(View.GONE);
 
             notificationSheetBehavior = BottomSheetBehavior.from(notificationSheetView);
@@ -88,50 +93,37 @@ public class MainActivity extends AppCompatActivity {
             notificationSheetBehavior.setPeekHeight(0, false);
             notificationSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-            // Ensure it's never blocking touch when hidden
             notificationSheetView.setOnTouchListener((v, event) ->
                 notificationSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN
             );
 
-            // Bind fragment setup safely
             notificationFragment = (NotificationBottomSheet)
                 getSupportFragmentManager().findFragmentById(R.id.notificationBottomSheet);
+
             if (notificationFragment != null) {
                 notificationFragment.setupBottomSheet(notificationSheetView);
             }
         }
     }
 
-    // ✅ Show Notification Sheet
     public void showNotificationSheet() {
         if (notificationSheetView == null || notificationSheetBehavior == null) return;
 
-        // Make it visible first
         notificationSheetView.setVisibility(View.VISIBLE);
-
-        // Collapse state for half-height appearance
         notificationSheetBehavior.setPeekHeight(
             (int) (450 * getResources().getDisplayMetrics().density)
         );
         notificationSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-        // Bring to front in case nav overlaps
         notificationSheetView.bringToFront();
     }
 
-    // ✅ Hide Notification Sheet
     public void hideNotificationSheet() {
         if (notificationSheetView == null || notificationSheetBehavior == null) return;
 
         notificationSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        // Delay hiding the view to allow animation to complete
-        notificationSheetView.postDelayed(() ->
-            notificationSheetView.setVisibility(View.GONE), 250
-        );
+        notificationSheetView.postDelayed(() -> notificationSheetView.setVisibility(View.GONE), 250);
     }
 
-    // ✅ Check if sheet is visible
     public boolean isNotificationSheetVisible() {
         return notificationSheetBehavior != null &&
             notificationSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN;

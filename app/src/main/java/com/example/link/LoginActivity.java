@@ -5,14 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.button.MaterialButton;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,22 +67,42 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 
                     if (success) {
+                        // ✅ Fetch values from JSON
                         String userType = jsonObject.getString("user_type");
+                        String userId = jsonObject.getString("user_id");
+                        String username = jsonObject.getString("username");
+                        String userEmail = jsonObject.getString("email");
 
+                        // ✅ Optional: store for future use
+                        // Example: SharedPreferences
+                        getSharedPreferences("UserSession", MODE_PRIVATE)
+                            .edit()
+                            .putString("user_id", userId)
+                            .putString("user_type", userType)
+                            .putString("username", username)
+                            .putString("email", userEmail)
+                            .apply();
+
+                        // ✅ Pass user_id to the next activity
+                        Intent intent;
                         if (userType.equals("rescuer")) {
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            intent.putExtra("userType", userType); // ✅ send userType to MainActivity
-                            startActivity(intent);
-                        } else if (userType.equals("user")) {
-                            Intent intent = new Intent(LoginActivity.this, UserActivity.class);
-                            intent.putExtra("userType", userType); // optional but consistent
-                            startActivity(intent);
+                            intent = new Intent(LoginActivity.this, MainActivity.class);
+                        } else {
+                            intent = new Intent(LoginActivity.this, UserActivity.class);
                         }
+
+                        intent.putExtra("user_id", userId);
+                        intent.putExtra("user_type", userType);
+                        intent.putExtra("username", username);
+                        intent.putExtra("email", userEmail);
+
+                        startActivity(intent);
                         finish();
                     }
 
                 } catch (JSONException e) {
-                    Toast.makeText(this, "Error parsing response", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                    Toast.makeText(this, "Error parsing server response", Toast.LENGTH_SHORT).show();
                 }
             },
             error -> Toast.makeText(this, "Network error: " + error.getMessage(), Toast.LENGTH_LONG).show()

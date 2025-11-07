@@ -2,11 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Added location permissions for user location tracking -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <application
         android:allowBackup="true"
@@ -31,7 +30,7 @@
             android:exported="false"
             android:label="Sign Up"
             android:theme="@style/Theme.Link"
-            android:windowSoftInputMode="adjustResize|stateHidden"/>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <activity android:name=".MainActivity" />
         <activity android:name=".UserActivity" />
@@ -48,6 +47,5 @@
             </intent-filter>
         </activity>
     </application>
-
 
 </manifest>
