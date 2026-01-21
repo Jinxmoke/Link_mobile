@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "331091018590",
+    "firebase_url": "https://link-e5add-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "link-e5add",
+    "storage_bucket": "link-e5add.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331091018590:android:5e39c6d090dd78224e05cf",
+        "android_client_info": {
+          "package_name": "com.example.link"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuElNT6a_VYLsvZnp0qffz4Q5gFEOXrFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

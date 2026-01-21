@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3F3F3"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Top Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="14dp">
+
+            <FrameLayout
+                android:id="@+id/btnBack"
+                android:layout_width="14dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:layout_marginEnd="115dp"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/back"
+                    />
+
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Assign Device"
+                android:textSize="15sp"
+                android:textColor="#0F172A"
+                android:fontFamily="@font/inter__extrabold"
+                android:layout_marginStart="8dp"
+                android:lineSpacingMultiplier="1.2" />
+
+        </LinearLayout>
+
+        <!-- Available Devices Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvAvailableTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Available Devices"
+                android:textSize="12sp"
+                android:textColor="#0F172A"
+                android:fontFamily="@font/inter_regular"
+                android:textStyle="bold"  />
+
+            <TextView
+                android:id="@+id/tvAvailableCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:fontFamily="@font/inter_medium"
+                android:background="@drawable/count_badge_bg"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:minWidth="32dp"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- Available Devices Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#FFFFFF"
+            android:layout_marginBottom="32dp">
+
+            <LinearLayout
+                android:id="@+id/availableDevicesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!-- Dynamic content will be added here -->
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Active Devices Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvActiveTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Active Devices"
+                android:textSize="12sp"
+                android:textColor="#0F172A"
+                android:fontFamily="@font/inter_regular"
+                android:textStyle="bold"  />
+
+            <TextView
+                android:id="@+id/tvActiveCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:fontFamily="@font/inter_medium"
+                android:background="@drawable/count_badge_bg"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:minWidth="32dp"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- Active Devices Container -->
+        <LinearLayout
+            android:id="@+id/activeDevicesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- Dynamic content will be added here -->
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

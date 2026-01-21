@@ -1,0 +1,1673 @@
+<!-- Map.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Response Map</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- Toastify for notifications -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Leaflet Marker Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <style>
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .legend {
+            padding: 10px 12px;
+            font: 14px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.97);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            min-width: 180px;
+            cursor: move;
+            user-select: none;
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            z-index: 1000;
+        }
+
+        .legend h4 {
+            margin: 0 0 10px;
+            color: #222;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 6px;
+            cursor: grab;
+            cursor: -webkit-grab;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .legend h4:active {
+            cursor: grabbing;
+            cursor: -webkit-grabbing;
+        }
+
+        .legend-minimize-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .legend-minimize-btn:hover {
+            color: #333;
+        }
+
+        .legend-content {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 500px;
+            opacity: 1;
+            overflow: hidden;
+        }
+
+        .legend-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-right: 10px;
+            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+        }
+
+        .legend-text {
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .legend-stats {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .staff-info {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #e0e0e0;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .staff-stat {
+            color: #2196F3;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .sos-stat {
+            color: #F44336;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        .station-popup {
+            min-width: 200px;
+            font-family: Arial, sans-serif;
+        }
+
+        .station-popup h4 {
+            margin: 0 0 8px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .station-popup p {
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .transmitter-popup {
+            min-width: 220px;
+            font-family: Arial, sans-serif;
+        }
+
+        .transmitter-popup h4 {
+            margin: 0 0 8px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .sos-popup {
+            min-width: 280px;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            padding: 12px;
+            font-family: 'Arial', sans-serif;
+            border-radius: 6px;
+        }
+
+        .acknowledged-popup {
+            min-width: 280px;
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            padding: 12px;
+            font-family: 'Arial', sans-serif;
+            border-radius: 6px;
+        }
+
+        .sos-alert {
+            color: #D32F2F;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: blink 1s infinite;
+        }
+
+        .sos-acknowledged {
+            color: #FF9800;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sos-resolved {
+            color: #4CAF50;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sos-popup h4 {
+            margin: 0 0 8px;
+            color: #C62828;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(244, 67, 54, 0.2);
+            padding-bottom: 6px;
+        }
+
+        .acknowledged-popup h4 {
+            margin: 0 0 8px;
+            color: #EF6C00;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+            padding-bottom: 6px;
+        }
+
+        .sos-popup p, .acknowledged-popup p {
+            margin: 6px 0;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .sos-popup p strong, .acknowledged-popup p strong {
+            color: #D32F2F;
+            font-weight: 600;
+        }
+
+        .ack-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+
+        .ack-btn:hover {
+            background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .ack-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+        }
+
+        .ack-btn.processing {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            cursor: wait;
+        }
+
+        .resolve-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .resolve-btn:hover {
+            background: linear-gradient(135deg, #43A047 0%, #1B5E20 100%);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .resolve-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+
+        .resolve-btn.processing {
+            background: linear-gradient(135deg, #8BC34A 0%, #689F38 100%);
+            cursor: wait;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        .firebase-status {
+            position: absolute;
+            bottom: 80px;
+            left: 10px;
+            background: rgba(255,255,255,0.95);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #666;
+            z-index: 1000;
+            border: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+        }
+
+        .firebase-connected {
+            color: #4CAF50;
+        }
+
+        .firebase-disconnected {
+            color: #F44336;
+        }
+
+        .leaflet-left .leaflet-control {
+            margin-left: 10px;
+            margin-top: 40px;
+        }
+
+        .ack-info {
+            background: #f0f7ff;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            border-left: 3px solid #2196F3;
+        }
+
+        .staff-badge {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .toastify {
+            border-radius: 12px; /* adjust as you like */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="staffBadge" class="staff-badge" style="display: none;">Loading staff info...</div>
+<div id="firebaseStatus" class="firebase-status">
+    <span id="firebaseStatusText">Connecting to Firebase...</span>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+    // This allows the Android app to call JavaScript functions on the map
+    window.MapFunctions = window.MapFunctions || {};
+
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB05O1RLnyUkZumm_RdKkYFF2Yt34OjX-Y",
+        authDomain: "link-e5add.firebaseapp.com",
+        databaseURL: "https://link-e5add-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "link-e5add"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Global variables
+    let map;
+    let transmitterMarkers = {};
+    let activeSOSAlerts = {};
+    let activeSOSSerials = new Set();
+    let acknowledgedSOSSerials = new Set();
+    let resolvedSOSSerials = new Set();
+    let sosAckStatus = {};
+    let receiverMarker = null;
+    let markerCluster;
+    let onlineDevices = 0;
+    let sosAlerts = 0;
+    let acknowledgedSOSCount = 0;
+    let totalDevices = 0;
+    let legendControl = null;
+    let isDraggingLegend = false;
+    let dragOffset = { x: 0, y: 0 };
+    let userLocationMarker = null;
+    let isMapInitialized = false;
+    let currentStaff = null;
+
+    // Track base stations to prevent duplicates
+    let baseStations = {};
+
+    /**
+     * STAFF INFORMATION MANAGEMENT
+     */
+    window.initStaffInfo = function() {
+        console.log("Initializing staff information...");
+
+        // Try multiple sources in order of priority
+        let staffData = null;
+
+        // 1. Try to get from Android interface
+        if (typeof AndroidApp !== 'undefined') {
+            try {
+                const androidData = AndroidApp.getFullStaffInfo();
+                if (androidData) {
+                    staffData = JSON.parse(androidData);
+                    console.log("Got staff data from Android interface:", staffData);
+
+                    // Store in localStorage for persistence
+                    if (staffData.id) localStorage.setItem('staff_id', staffData.id);
+                    if (staffData.name) localStorage.setItem('staff_name', staffData.name);
+                    if (staffData.role) localStorage.setItem('staff_role', staffData.role);
+                }
+            } catch (e) {
+                console.error("Error getting staff data from Android:", e);
+            }
+        }
+
+        // 2. Try localStorage
+        if (!staffData) {
+            const staffId = localStorage.getItem('staff_id');
+            const staffName = localStorage.getItem('staff_name');
+            const staffRole = localStorage.getItem('staff_role');
+
+            if (staffId && staffName) {
+                staffData = {
+                    id: staffId,
+                    name: staffName,
+                    role: staffRole || "Responder"
+                };
+                console.log("Got staff data from localStorage:", staffData);
+            }
+        }
+
+        // 3. Default fallback
+        if (!staffData) {
+            staffData = {
+                id: "STAFF001",
+                name: "Staff Member",
+                role: "Responder"
+            };
+            console.warn("Using default staff data");
+        }
+
+        currentStaff = staffData;
+        console.log("Staff initialized:", currentStaff);
+
+        // Update UI with staff info
+        updateStaffUI();
+
+        // Show toast notification
+        if (currentStaff.id !== "STAFF001") {
+            showToast(`Logged in as ${currentStaff.name} (${currentStaff.role})`, 'success');
+        }
+
+        return currentStaff;
+    };
+
+    function updateStaffUI() {
+        if (!currentStaff) return;
+
+        // Update staff badge only
+        const staffBadge = document.getElementById('staffBadge');
+        if (staffBadge) {
+            staffBadge.style.display = 'block';
+            staffBadge.textContent = `${currentStaff.name} (${currentStaff.role})`;
+        }
+
+        // REMOVE staff info from legend entirely
+        const legendStats = document.querySelector('.legend-stats');
+        if (legendStats) {
+            const existingStaffInfo = legendStats.querySelector('.staff-info');
+            if (existingStaffInfo) {
+                existingStaffInfo.remove();
+            }
+        }
+    }
+
+    function checkStaffLogin() {
+        if (!currentStaff || currentStaff.id === "STAFF001") {
+            console.warn("Staff not properly logged in");
+
+            // Try to re-initialize staff info
+            setTimeout(() => {
+                window.initStaffInfo();
+            }, 1000);
+
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * SOS Tracking System
+     */
+    const sosTrackingSystem = {
+        markAsSOSActive: function(serialNumber, assignmentId) {
+            const key = `${assignmentId}_${serialNumber}`;
+            if (!activeSOSSerials.has(key)) {
+                activeSOSSerials.add(key);
+                acknowledgedSOSSerials.delete(key);
+                resolvedSOSSerials.delete(key);
+                removeTransmitterFromMap(serialNumber);
+                if (onlineDevices > 0) {
+                    onlineDevices--;
+                }
+            }
+        },
+
+        markAsSOSAcknowledged: function(serialNumber, assignmentId) {
+            const key = `${assignmentId}_${serialNumber}`;
+            if (activeSOSSerials.has(key)) {
+                activeSOSSerials.delete(key);
+                acknowledgedSOSSerials.add(key);
+                resolvedSOSSerials.delete(key);
+                sosAckStatus[serialNumber] = {
+                    acknowledged: true,
+                    ackTime: new Date().getTime(),
+                    ackBy: currentStaff,
+                    assignment_id: assignmentId
+                };
+                removeSOSMarker(serialNumber);
+            }
+        },
+
+        markAsSOSResolved: function(serialNumber, assignmentId) {
+            const key = `${assignmentId}_${serialNumber}`;
+            activeSOSSerials.delete(key);
+            acknowledgedSOSSerials.delete(key);
+            resolvedSOSSerials.add(key);
+            delete sosAckStatus[serialNumber];
+            removeSOSMarker(serialNumber);
+        },
+
+        hasActiveSOS: function(serialNumber, assignmentId) {
+            const key = `${assignmentId}_${serialNumber}`;
+            return activeSOSSerials.has(key);
+        },
+
+        hasAcknowledgedSOS: function(serialNumber, assignmentId) {
+            const key = `${assignmentId}_${serialNumber}`;
+            return acknowledgedSOSSerials.has(key);
+        },
+
+        hasResolvedSOS: function(serialNumber, assignmentId) {
+            const key = `${assignmentId}_${serialNumber}`;
+            return resolvedSOSSerials.has(key);
+        },
+
+        getActiveSOSCount: function() {
+            return activeSOSSerials.size;
+        },
+
+        getAcknowledgedSOSCount: function() {
+            return acknowledgedSOSSerials.size;
+        },
+
+        getResolvedSOSCount: function() {
+            return resolvedSOSSerials.size;
+        },
+
+        getActiveSOSDevices: function() {
+            return Array.from(activeSOSSerials);
+        },
+
+        getAcknowledgedSOSDevices: function() {
+            return Array.from(acknowledgedSOSSerials);
+        },
+
+        clearAllSOS: function() {
+            activeSOSSerials.clear();
+            acknowledgedSOSSerials.clear();
+            resolvedSOSSerials.clear();
+            sosAckStatus = {};
+        }
+    };
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function getRSSIGrade(rssi) {
+        if (rssi === null || rssi === undefined) return { grade: 'N/A', class: '', color: '#999' };
+
+        const value = parseInt(rssi);
+        if (value >= -50) {
+            return { grade: 'Excellent', class: 'signal-excellent', color: '#4CAF50' };
+        } else if (value >= -60) {
+            return { grade: 'Good', class: 'signal-good', color: '#8BC34A' };
+        } else if (value >= -70) {
+            return { grade: 'Fair', class: 'signal-fair', color: '#FFC107' };
+        } else if (value >= -80) {
+            return { grade: 'Weak', class: 'signal-weak', color: '#FF9800' };
+        } else if (value >= -90) {
+            return { grade: 'Bad', class: 'signal-bad', color: '#F44336' };
+        } else {
+            return { grade: 'Very Bad', class: 'signal-bad', color: '#F44336' };
+        }
+    }
+
+    function initMap() {
+        // Set initial view to Manila coordinates
+        map = L.map('map', { zoomControl: false }).setView([14.5995, 120.9842], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        markerCluster = L.markerClusterGroup({
+            maxClusterRadius: 50,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true
+        });
+        map.addLayer(markerCluster);
+
+        addLegend();
+        initializeFirebaseListeners();
+
+        // Initialize staff info
+        window.initStaffInfo();
+
+        isMapInitialized = true;
+
+        // Notify Android that map is ready
+        if (typeof AndroidApp !== 'undefined') {
+            try {
+                AndroidApp.onMapReady();
+            } catch (e) {
+                console.log("Android interface not fully available");
+            }
+        }
+    }
+
+    function addLegend() {
+        const legendDiv = document.createElement('div');
+        legendDiv.id = 'map-legend';
+        legendDiv.className = 'legend';
+        let isCollapsed = false;
+
+        legendDiv.innerHTML = `
+            <h4>
+                <span>Map Legend</span>
+                <button class="legend-minimize-btn" id="minimizeBtn">−</button>
+            </h4>
+            <div class="legend-content" id="legendContent">
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #64748b;"></div>
+                    <span class="legend-text">Base Station</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #22d3ee;"></div>
+                    <span class="legend-text">Transmitter</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #3b82f6;"></div>
+                    <span class="legend-text">User Location</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #F44336;"></div>
+                    <span class="legend-text">SOS Alert</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="background: #FF9800;"></div>
+                    <span class="legend-text">SOS Acknowledged</span>
+                </div>
+                <div class="legend-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Live:</span>
+                        <span id="onlineCount" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">SOS:</span>
+                        <span id="sosCount" class="stat-value sos-stat">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Acknowledge:</span>
+                        <span id="acknowledgedCount" class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(legendDiv);
+        makeLegendDraggable(legendDiv);
+
+        const minimizeBtn = legendDiv.querySelector('#minimizeBtn');
+        const legendContent = legendDiv.querySelector('#legendContent');
+
+        minimizeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isCollapsed = !isCollapsed;
+            if (isCollapsed) {
+                legendContent.classList.add('collapsed');
+                minimizeBtn.textContent = '+';
+            } else {
+                legendContent.classList.remove('collapsed');
+                minimizeBtn.textContent = '−';
+            }
+        });
+    }
+
+    function makeLegendDraggable(legendElement) {
+        const header = legendElement.querySelector('h4');
+
+        header.addEventListener('mousedown', (e) => {
+            isDraggingLegend = true;
+            dragOffset.x = e.clientX - legendElement.offsetLeft;
+            dragOffset.y = e.clientY - legendElement.offsetTop;
+
+            document.addEventListener('mousemove', dragLegend);
+            document.addEventListener('mouseup', stopDraggingLegend);
+        });
+
+        function dragLegend(e) {
+            if (!isDraggingLegend) return;
+
+            const mapContainer = document.getElementById('map');
+            const newLeft = e.clientX - dragOffset.x;
+            const newTop = e.clientY - dragOffset.y;
+
+            const maxLeft = mapContainer.offsetWidth - legendElement.offsetWidth - 10;
+            const maxTop = mapContainer.offsetHeight - legendElement.offsetHeight - 10;
+
+            legendElement.style.left = Math.max(10, Math.min(newLeft, maxLeft)) + 'px';
+            legendElement.style.top = Math.max(10, Math.min(newTop, maxTop)) + 'px';
+        }
+
+        function stopDraggingLegend() {
+            isDraggingLegend = false;
+            document.removeEventListener('mousemove', dragLegend);
+            document.removeEventListener('mouseup', stopDraggingLegend);
+        }
+    }
+
+    window.MapFunctions.updateUserLocation = function(latitude, longitude) {
+        if (!map || !isMapInitialized) {
+            console.error('[v0] Map not initialized yet');
+            return;
+        }
+
+        if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+        }
+
+        const icon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #3b82f6; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);"></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6]
+        });
+
+        userLocationMarker = L.marker([latitude, longitude], { icon })
+            .addTo(map)
+            .bindPopup(`
+                <div class="station-popup">
+                    <h4>Your Location</h4>
+                    <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
+                    <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
+                </div>
+            `);
+    };
+
+    window.MapFunctions.addBaseStationMarkers = function(baseStationsArray) {
+        if (!Array.isArray(baseStationsArray)) {
+            console.error('Base stations is not an array');
+            return;
+        }
+
+        console.log(`[Map] Adding ${baseStationsArray.length} base station(s)`);
+
+        baseStationsArray.forEach(station => {
+            try {
+                const { id, station_name, latitude, longitude, status, address, altitude, online_devices, total_devices } = station;
+
+                // Validate coordinates
+                if (!latitude || !longitude || latitude === 0 && longitude === 0) {
+                    console.warn(`Invalid coordinates for station: ${station_name}`);
+                    return;
+                }
+
+                const stationId = String(id);
+
+                // Check if station already exists
+                if (baseStations[stationId]) {
+                    console.log(`[Map] Base station ${stationId} already exists, updating...`);
+
+                    // Update existing marker position
+                    if (baseStations[stationId].marker) {
+                        baseStations[stationId].marker.setLatLng([latitude, longitude]);
+
+                        // Update popup content
+                        const popupContent = `
+                            <div class="station-popup">
+                                <h4>${escapeHtml(station_name)}</h4>
+                                <p><strong>ID:</strong> ${escapeHtml(stationId)}</p>
+                                <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
+                                <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
+                                <p><strong>Address:</strong> ${escapeHtml(address || 'N/A')}</p>
+                                <p><strong>Altitude:</strong> ${altitude ? altitude.toFixed(2) : '0'}m</p>
+                                <p><strong>Status:</strong> ${escapeHtml(status || 'Active')}</p>
+                                <p><strong>Devices:</strong> ${online_devices || 0}/${total_devices || 0} online</p>
+                            </div>
+                        `;
+
+                        baseStations[stationId].marker.getPopup().setContent(popupContent);
+                    }
+
+                    return;
+                }
+
+                // Create new marker
+                const icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="background-color: #64748b; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+
+                const marker = L.marker([latitude, longitude], { icon })
+                    .bindPopup(`
+                        <div class="station-popup">
+                            <h4>${escapeHtml(station_name)}</h4>
+                            <p><strong>ID:</strong> ${escapeHtml(stationId)}</p>
+                            <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
+                            <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
+                            <p><strong>Address:</strong> ${escapeHtml(address || 'N/A')}</p>
+                            <p><strong>Altitude:</strong> ${altitude ? altitude.toFixed(2) : '0'}m</p>
+                            <p><strong>Status:</strong> ${escapeHtml(status || 'Active')}</p>
+                            <p><strong>Devices:</strong> ${online_devices || 0}/${total_devices || 0} online</p>
+                        </div>
+                    `);
+
+                markerCluster.addLayer(marker);
+
+                // Store in tracking object
+                baseStations[stationId] = {
+                    marker: marker,
+                    data: station
+                };
+
+                console.log(`[Map] Added base station: ${station_name} (${stationId})`);
+
+            } catch (error) {
+                console.error('Error adding marker for station:', error);
+            }
+        });
+    };
+
+    /**
+     * SOS ACKNOWLEDGMENT FUNCTION - WITH STAFF VALIDATION
+     */
+    function acknowledgeSOS(alert) {
+        // Check if staff is properly logged in
+        if (!checkStaffLogin()) {
+            showToast('Please log in as staff to acknowledge SOS alerts', 'error');
+            return;
+        }
+
+        const { transmitter_serial, alert_time, battery_percent, rssi, snr, id, user_id, assignment_id } = alert;
+
+        // Get the button and show processing state
+        const buttons = document.querySelectorAll('.ack-btn');
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Acknowledge SOS')) {
+                btn.classList.add('processing');
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
+            }
+        });
+
+        const acknowledgedTime = new Date().toISOString();
+
+        // Update Firebase immediately with assignment-based path
+        database.ref(`sos_alerts/${assignment_id}/${transmitter_serial}`).update({
+            acknowledged: true,
+            acknowledged_time: acknowledgedTime,
+            acknowledged_by: currentStaff.id,
+            acknowledged_by_name: currentStaff.name,
+            resolved: false // Ensure resolved is false when acknowledging
+        }).then(() => {
+            console.log(`SOS acknowledged for ${transmitter_serial} (assignment: ${assignment_id}) by ${currentStaff.name}`);
+
+            // Update tracking system
+            sosTrackingSystem.markAsSOSAcknowledged(transmitter_serial, assignment_id);
+
+            // Send to database
+            sendAcknowledgementToDatabase({
+                sos_id: id,
+                transmitter_serial: transmitter_serial,
+                user_id: user_id,
+                assignment_id: assignment_id,
+                acknowledged_by: currentStaff.id,
+                acknowledged_by_name: currentStaff.name,
+                acknowledged_time: acknowledgedTime,
+                alert_data: alert
+            });
+
+            // Update counts immediately
+            updateCounts();
+
+            // Reset button state
+            setTimeout(() => {
+                buttons.forEach(btn => {
+                    btn.classList.remove('processing');
+                    btn.disabled = false;
+                });
+            }, 1000);
+
+        }).catch((error) => {
+            console.error('Error acknowledging SOS:', error);
+            showToast('Failed to acknowledge SOS', 'error');
+
+            // Reset button on error
+            buttons.forEach(btn => {
+                btn.classList.remove('processing');
+                btn.disabled = false;
+                btn.textContent = 'Acknowledge SOS';
+            });
+        });
+    }
+
+    /**
+     * RESOLVE SOS FUNCTION - WITH STAFF VALIDATION
+     */
+    function resolveSOS(serialNumber, assignmentId) {
+        // Check if staff is properly logged in
+        if (!checkStaffLogin()) {
+            showToast('Please log in as staff to resolve SOS alerts', 'error');
+            return;
+        }
+
+        // Get the button and show processing state
+        const buttons = document.querySelectorAll('.resolve-btn');
+        buttons.forEach(btn => {
+            btn.classList.add('processing');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+        });
+
+        const resolvedTime = new Date().toISOString();
+
+        // Update Firebase with assignment-based path
+        database.ref(`sos_alerts/${assignmentId}/${serialNumber}`).update({
+            resolved: true,
+            resolved_time: resolvedTime,
+            resolved_by: currentStaff.id,
+            resolved_by_name: currentStaff.name
+        }).then(() => {
+            console.log(`SOS resolved for ${serialNumber} (assignment: ${assignmentId}) by ${currentStaff.name}`);
+
+            // Update tracking system
+            sosTrackingSystem.markAsSOSResolved(serialNumber, assignmentId);
+
+            // Remove marker from map
+            removeSOSMarker(serialNumber);
+
+            // Send to database
+            sendResolutionToDatabase({
+                transmitter_serial: serialNumber,
+                assignment_id: assignmentId,
+                resolved_by: currentStaff.id,
+                resolved_by_name: currentStaff.name,
+                resolved_time: resolvedTime
+            });
+
+            // Update counts immediately
+            updateCounts();
+
+            // Reset button state
+            setTimeout(() => {
+                buttons.forEach(btn => {
+                    btn.classList.remove('processing');
+                    btn.disabled = false;
+                });
+            }, 1000);
+
+        }).catch((error) => {
+            console.error('Error resolving SOS:', error);
+            showToast('Failed to resolve SOS', 'error');
+
+            // Reset button on error
+            buttons.forEach(btn => {
+                btn.classList.remove('processing');
+                btn.disabled = false;
+                btn.textContent = 'Resolve SOS';
+            });
+        });
+    }
+
+    function sendAcknowledgementToDatabase(data) {
+        console.log('📤 Sending ACK payload:', data);
+
+        fetch('https://cbhms.ucc-bsit.org/LinkApi/acknowledge_sos.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(async response => {
+            console.log('📡 HTTP status:', response.status);
+
+            const text = await response.text();
+            console.log('📥 Raw response:', text);
+
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                throw new Error('Invalid JSON from server');
+            }
+        })
+        .then(result => {
+            console.log('✅ Parsed result:', result);
+
+            if (result.success) {
+                showToast(
+                    `SOS from ${data.transmitter_serial} acknowledged by ${currentStaff.name}!`,
+                    'success'
+                );
+
+            } else {
+                console.error('❌ API failure:', result.message);
+                showToast(`DB Error: ${result.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('🔥 Fetch error:', error);
+            showToast(`Network / Parse error: ${error.message}`, 'error');
+        });
+    }
+
+    function sendResolutionToDatabase(data) {
+        fetch('https://cbhms.ucc-bsit.org/LinkApi/resolve_sos.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('SOS resolved in database:', result);
+                showToast(`SOS for ${data.transmitter_serial} resolved by ${currentStaff.name}!`, 'success');
+            } else {
+                console.error('Database resolution failed:', result.message);
+                showToast('Failed to save resolution to database', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending resolution:', error);
+            showToast('Network error when saving resolution', 'error');
+        });
+    }
+
+    function showToast(message, type = 'info') {
+        let backgroundColor;
+        switch(type) {
+            case 'success':
+                backgroundColor = "#DC3545";
+            case 'error':
+                backgroundColor = "#198754";
+                break;
+            case 'warning':
+                backgroundColor = "#FFC107";
+                break;
+            default:
+                backgroundColor = "#6C757D";
+        }
+
+        Toastify({
+            text: message,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: backgroundColor,
+            stopOnFocus: true
+        }).showToast();
+    }
+
+    function initializeFirebaseListeners() {
+        console.log('🚀 Initializing Firebase listeners...');
+        updateFirebaseStatus(true);
+
+        // First, check Firebase connection
+        database.ref('.info/connected').on('value', (snapshot) => {
+            const connected = snapshot.val();
+            console.log('📡 Firebase connection status:', connected);
+            updateFirebaseStatus(connected);
+
+            if (connected) {
+                // Load initial data
+                loadInitialData();
+            }
+        });
+    }
+
+    function loadInitialData() {
+        console.log('📡 Loading initial data from Firebase...');
+
+        // Load SOS alerts
+        database.ref('sos_alerts').once('value', (snapshot) => {
+            const assignments = snapshot.val();
+            console.log('📡 SOS alerts structure:', assignments);
+
+            sosAlerts = 0;
+            activeSOSSerials.clear();
+            acknowledgedSOSSerials.clear();
+            resolvedSOSSerials.clear();
+            sosAckStatus = {};
+
+            if (assignments) {
+                console.log('📡 Found SOS assignments:', Object.keys(assignments));
+
+                Object.keys(assignments).forEach(assignmentId => {
+                    const alerts = assignments[assignmentId];
+                    if (alerts) {
+                        console.log(`📡 SOS alerts in ${assignmentId}:`, Object.keys(alerts));
+
+                        Object.keys(alerts).forEach(serialNumber => {
+                            const alert = alerts[serialNumber];
+                            if (alert) {
+                                const key = `${assignmentId}_${serialNumber}`;
+                                console.log(`📡 SOS alert for ${serialNumber}:`, alert);
+
+                                if (alert.resolved) {
+                                    // Mark as resolved
+                                    resolvedSOSSerials.add(key);
+                                    console.log(`🟢 Resolved SOS: ${serialNumber} in ${assignmentId}`);
+                                } else if (alert.acknowledged) {
+                                    // Mark as acknowledged (but not resolved)
+                                    acknowledgedSOSSerials.add(key);
+                                    sosAckStatus[serialNumber] = {
+                                        acknowledged: true,
+                                        ackTime: new Date(alert.acknowledged_time).getTime(),
+                                        ackBy: {
+                                            id: alert.acknowledged_by,
+                                            name: alert.acknowledged_by_name
+                                        },
+                                        assignment_id: assignmentId,
+                                        resolved: false
+                                    };
+                                    console.log(`🟡 Acknowledged SOS: ${serialNumber} in ${assignmentId}`);
+                                } else {
+                                    // Active SOS (not acknowledged, not resolved)
+                                    sosAlerts++;
+                                    activeSOSSerials.add(key);
+                                    sosAckStatus[serialNumber] = {
+                                        acknowledged: false,
+                                        assignment_id: assignmentId
+                                    };
+                                    console.log(`🔴 Active SOS: ${serialNumber} in ${assignmentId}`);
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.log('📡 No SOS alerts found');
+            }
+
+            // Start real-time listeners
+            setupRealTimeListeners();
+            updateCounts();
+        }).catch(error => {
+            console.error('❌ Error loading SOS alerts:', error);
+        });
+    }
+
+    function setupRealTimeListeners() {
+        console.log('📡 Setting up real-time listeners...');
+
+        // Listen to ALL assignment groups for devices
+        database.ref('devices').on('value', (snapshot) => {
+            const assignments = snapshot.val();
+            console.log('📡 Received devices update, assignments:', assignments ? Object.keys(assignments) : 'none');
+
+            onlineDevices = 0;
+            totalDevices = 0;
+
+            // Clear all existing markers first
+            Object.keys(transmitterMarkers).forEach(serial => {
+                removeTransmitterFromMap(serial);
+            });
+
+            if (assignments) {
+                console.log('📡 Processing assignments:', Object.keys(assignments));
+
+                Object.keys(assignments).forEach(assignmentId => {
+                    const devices = assignments[assignmentId];
+                    console.log(`📡 Assignment ${assignmentId} has devices:`, devices ? Object.keys(devices) : 'none');
+
+                    if (devices) {
+                        Object.keys(devices).forEach(serialNumber => {
+                            const deviceData = devices[serialNumber];
+                            console.log(`📡 Device ${serialNumber} in ${assignmentId}:`, deviceData);
+
+                            if (deviceData && deviceData.location) {
+                                const location = deviceData.location;
+                                const key = `${assignmentId}_${serialNumber}`;
+
+                                console.log(`📡 Location data for ${serialNumber}:`, location);
+
+                                if (location.status === 'online' && location.latitude && location.longitude) {
+                                    // Check SOS status first
+                                    if (activeSOSSerials.has(key)) {
+                                        console.log(`📡 ${serialNumber} is in active SOS, skipping transmitter marker`);
+                                        removeTransmitterFromMap(serialNumber);
+                                    } else if (acknowledgedSOSSerials.has(key) || resolvedSOSSerials.has(key)) {
+                                        console.log(`📡 ${serialNumber} is in acknowledged/resolved SOS, skipping transmitter marker`);
+                                        removeTransmitterFromMap(serialNumber);
+                                    } else {
+                                        onlineDevices++;
+                                        updateTransmitterOnMap(serialNumber, location, assignmentId, deviceData);
+                                        console.log(`✅ Added transmitter marker for ${serialNumber}`);
+                                    }
+                                } else {
+                                    console.log(`📡 ${serialNumber} not online or missing location, removing marker`);
+                                    removeTransmitterFromMap(serialNumber);
+                                }
+                            } else {
+                                console.log(`📡 ${serialNumber} has no location data in Firebase`);
+                            }
+
+                            totalDevices++;
+                        });
+                    }
+                });
+            } else {
+                console.log('📡 No devices found in any assignment');
+            }
+
+            console.log(`📡 Online devices: ${onlineDevices}, Total devices: ${totalDevices}`);
+            updateCounts();
+        });
+
+        // Listen to ALL assignment groups for SOS alerts
+        database.ref('sos_alerts').on('value', (snapshot) => {
+            const assignments = snapshot.val();
+            sosAlerts = 0;
+
+            if (assignments) {
+                Object.keys(assignments).forEach(assignmentId => {
+                    const alerts = assignments[assignmentId];
+                    if (alerts) {
+                        Object.keys(alerts).forEach(serialNumber => {
+                            const alert = alerts[serialNumber];
+                            if (alert) {
+                                const key = `${assignmentId}_${serialNumber}`;
+
+                                // Check resolved status first
+                                if (alert.resolved) {
+                                    // Remove from active and acknowledged, add to resolved
+                                    activeSOSSerials.delete(key);
+                                    acknowledgedSOSSerials.delete(key);
+                                    resolvedSOSSerials.add(key);
+                                    removeSOSMarker(serialNumber);
+                                    console.log(`🟢 SOS resolved: ${serialNumber} in ${assignmentId}`);
+                                } else if (alert.acknowledged) {
+                                    // Move from active to acknowledged
+                                    acknowledgedSOSSerials.add(key);
+                                    activeSOSSerials.delete(key);
+                                    resolvedSOSSerials.delete(key);
+                                    showAcknowledgedSOSMarker(serialNumber, alert, assignmentId);
+                                    console.log(`🟡 SOS acknowledged: ${serialNumber} in ${assignmentId}`);
+                                } else {
+                                    // Active SOS
+                                    sosAlerts++;
+                                    activeSOSSerials.add(key);
+                                    acknowledgedSOSSerials.delete(key);
+                                    resolvedSOSSerials.delete(key);
+                                    handleSOSAlert(alert, assignmentId);
+                                    console.log(`🔴 Active SOS: ${serialNumber} in ${assignmentId}`);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Clean up markers for devices that are no longer in SOS
+            Object.keys(activeSOSAlerts).forEach(markerId => {
+                const serialNumber = markerId.replace('sos_', '');
+                let found = false;
+
+                if (assignments) {
+                    Object.keys(assignments).forEach(assignmentId => {
+                        if (assignments[assignmentId] && assignments[assignmentId][serialNumber]) {
+                            const alert = assignments[assignmentId][serialNumber];
+                            if (!alert.resolved) {
+                                found = true;
+                            }
+                        }
+                    });
+                }
+
+                if (!found) {
+                    removeSOSMarker(serialNumber);
+                }
+            });
+
+            updateCounts();
+        });
+    }
+
+    function updateTransmitterOnMap(serialNumber, locationData, assignmentId, deviceData) {
+        const { latitude, longitude, battery_percent, rssi, counter, assigned_name, status, isSos } = locationData;
+
+        // Validate coordinates
+        if (!latitude || !longitude || latitude === 0 && longitude === 0) {
+            console.log(`❌ Invalid coordinates for ${serialNumber}: lat=${latitude}, lng=${longitude}`);
+            removeTransmitterFromMap(serialNumber);
+            return;
+        }
+
+        // Don't show SOS devices as regular transmitters
+        if (isSos === true) {
+            console.log(`📡 ${serialNumber} is in SOS mode, not showing as transmitter`);
+            removeTransmitterFromMap(serialNumber);
+            return;
+        }
+
+        const signalGrade = getRSSIGrade(rssi);
+        const deviceName = assigned_name || (deviceData && deviceData.assigned_name) || serialNumber;
+
+        console.log(`📍 Updating transmitter ${serialNumber} at ${latitude}, ${longitude}`);
+
+        if (transmitterMarkers[serialNumber]) {
+            // Update existing marker
+            transmitterMarkers[serialNumber].setLatLng([latitude, longitude]);
+            transmitterMarkers[serialNumber].getPopup().setContent(`
+                <div class="transmitter-popup">
+                    <h4>${escapeHtml(deviceName)}</h4>
+                    <p><strong>Serial:</strong> ${serialNumber}</p>
+                    <p><strong>Assignment:</strong> ${assignmentId}</p>
+                    <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
+                    <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi || 'N/A'} dBm)</span></p>
+                    <p><strong>Counter:</strong> #${counter || 0}</p>
+                    <p><strong>Status:</strong> <span style="color: #00BCD4;">Online</span></p>
+                    <p><small>Last update: ${new Date().toLocaleTimeString()}</small></p>
+                </div>
+            `);
+        } else {
+            // Create new marker
+            const icon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background-color: #22d3ee; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+
+            const marker = L.marker([latitude, longitude], { icon })
+                .bindPopup(`
+                    <div class="transmitter-popup">
+                        <h4>${escapeHtml(deviceName)}</h4>
+                        <p><strong>Serial:</strong> ${serialNumber}</p>
+                        <p><strong>Assignment:</strong> ${assignmentId}</p>
+                        <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
+                        <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi || 'N/A'} dBm)</span></p>
+                        <p><strong>Counter:</strong> #${counter || 0}</p>
+                        <p><strong>Status:</strong> <span style="color: #00BCD4;">Online</span></p>
+                        <p><small>Last update: ${new Date().toLocaleTimeString()}</small></p>
+                    </div>
+                `);
+
+            transmitterMarkers[serialNumber] = marker;
+
+            // Add to marker cluster instead of directly to map
+            markerCluster.addLayer(marker);
+
+            console.log(`✅ Created new marker for ${serialNumber}`);
+        }
+    }
+
+    function removeTransmitterFromMap(serialNumber) {
+        if (transmitterMarkers[serialNumber]) {
+            markerCluster.removeLayer(transmitterMarkers[serialNumber]);
+            delete transmitterMarkers[serialNumber];
+            console.log(`🗑️ Removed transmitter marker for ${serialNumber}`);
+        }
+    }
+
+    function handleSOSAlert(alert, assignmentId) {
+        const { transmitter_serial, acknowledged, resolved } = alert;
+
+        if (acknowledged || resolved) {
+            removeSOSMarker(transmitter_serial);
+            return;
+        }
+
+        updateSOSMarker(alert, assignmentId);
+        playAlertSound();
+    }
+
+    function updateSOSMarker(alert, assignmentId) {
+        const { transmitter_serial, latitude, longitude, acknowledged, resolved, rssi, battery_percent, alert_time, snr, assigned_name } = alert;
+
+        if (acknowledged || resolved) {
+            removeSOSMarker(transmitter_serial);
+            return;
+        }
+
+        const signalGrade = getRSSIGrade(rssi);
+        const markerId = `sos_${transmitter_serial}`;
+
+        if (activeSOSAlerts[markerId]) {
+            map.removeLayer(activeSOSAlerts[markerId]);
+        }
+
+        const icon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #F44336; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(244, 67, 54, 0.8); animation: pulse 1s infinite;"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        // Add assignment_id to the alert object
+        alert.assignment_id = assignmentId;
+
+        const marker = L.marker([latitude, longitude], { icon })
+            .addTo(map)
+            .bindPopup(`
+                <div class="sos-popup">
+                    <div class="sos-alert blink">SOS ALERT</div>
+                    <h4>${transmitter_serial}</h4>
+                    <p><strong>Customer ID:</strong> ${assignmentId}</p>
+                    <p><strong>Customer Name:</strong> ${assigned_name || 'Unknown'}</p>
+                    <p><strong>Alert Time:</strong> ${new Date(alert_time).toLocaleString()}</p>
+                    <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
+                    <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi} dBm)</span></p>
+                    <p><strong>SNR:</strong> ${snr || 'N/A'}</p>
+                    <button class="ack-btn" onclick="acknowledgeSOS(${JSON.stringify(alert).replace(/"/g, '&quot;')})">Acknowledge SOS</button>
+                </div>
+            `);
+
+        activeSOSAlerts[markerId] = marker;
+
+        // Center map on new SOS
+        map.setView([latitude, longitude], 16);
+        marker.openPopup();
+    }
+
+    function showAcknowledgedSOSMarker(serialNumber, alert, assignmentId) {
+        const markerId = `sos_${serialNumber}`;
+
+        // Remove red SOS marker
+        if (activeSOSAlerts[markerId]) {
+            map.removeLayer(activeSOSAlerts[markerId]);
+        }
+
+        if (!alert || !alert.latitude || !alert.longitude) {
+            console.warn('Invalid alert data for acknowledged SOS:', serialNumber);
+            return;
+        }
+
+        const { latitude, longitude, rssi, battery_percent, assigned_name, alert_time, acknowledged_time, acknowledged_by, acknowledged_by_name, snr, resolved } = alert;
+
+        // Don't show if already resolved
+        if (resolved) {
+            removeSOSMarker(serialNumber);
+            return;
+        }
+
+        const signalGrade = getRSSIGrade(rssi);
+
+        const icon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #FF9800; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        // Only show resolve button if current staff is the one who acknowledged it
+        const showResolveButton = currentStaff && currentStaff.id === acknowledged_by;
+
+        const popupContent = `
+            <div class="acknowledged-popup">
+                <div class="sos-acknowledged">SOS ACKNOWLEDGED</div>
+                <h4>${serialNumber}</h4>
+                <p><strong>Customer ID:</strong> ${assignmentId}</p>
+                <p><strong>Customer Name:</strong> ${assigned_name || 'Unknown'}</p>
+                <p><strong>Alert Time:</strong> ${new Date(alert_time).toLocaleString()}</p>
+                <div class="ack-info">
+                    <p><strong>Acknowledged By:</strong> ${acknowledged_by_name || acknowledged_by || 'Staff'}</p>
+                    <p><strong>Acknowledged Time:</strong> ${new Date(acknowledged_time).toLocaleString()}</p>
+                </div>
+                <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
+                <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi} dBm)</span></p>
+                <p><strong>SNR:</strong> ${snr || 'N/A'}</p>
+                ${showResolveButton ?
+                    `<button class="resolve-btn" onclick="resolveSOS('${serialNumber}', '${assignmentId}')">Resolve SOS</button>` :
+                    '<p class="resolve-note"><em>Only ${acknowledged_by_name || acknowledged_by} can resolve this SOS</em></p>'}
+            </div>
+        `;
+
+        const marker = L.marker([latitude, longitude], { icon })
+            .addTo(map)
+            .bindPopup(popupContent);
+
+        activeSOSAlerts[markerId] = marker;
+    }
+
+    function removeSOSMarker(serialNumber) {
+        const markerId = `sos_${serialNumber}`;
+        if (activeSOSAlerts[markerId]) {
+            map.removeLayer(activeSOSAlerts[markerId]);
+            delete activeSOSAlerts[markerId];
+            console.log(`🗑️ Removed SOS marker for ${serialNumber}`);
+        }
+    }
+
+    function playAlertSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (e) {
+            console.log('Audio not supported');
+        }
+    }
+
+    function updateCounts() {
+        // Update online devices count
+        document.getElementById('onlineCount').textContent = onlineDevices;
+
+        // Update active SOS count
+        sosAlerts = activeSOSSerials.size;
+        document.getElementById('sosCount').textContent = sosAlerts;
+
+        // Update acknowledged SOS count (only those that are acknowledged but not resolved)
+        acknowledgedSOSCount = acknowledgedSOSSerials.size;
+        document.getElementById('acknowledgedCount').textContent = acknowledgedSOSCount;
+
+        console.log(`📊 Stats: Online=${onlineDevices}, Active SOS=${sosAlerts}, Acknowledged=${acknowledgedSOSCount}, Resolved=${resolvedSOSSerials.size}`);
+    }
+
+    function updateFirebaseStatus(connected) {
+        const statusText = document.getElementById('firebaseStatusText');
+        if (connected) {
+            statusText.innerHTML = '<span class="firebase-connected">● Firebase Connected</span>';
+        } else {
+            statusText.innerHTML = '<span class="firebase-disconnected">● Firebase Disconnected</span>';
+        }
+    }
+
+    window.checkFirebaseStatus = function() {
+        return database.ref('.info/connected').once('value').then(snapshot => {
+            const connected = snapshot.val();
+            updateFirebaseStatus(connected);
+            return connected;
+        });
+    };
+
+    // Expose functions to global scope for onclick events
+    window.acknowledgeSOS = acknowledgeSOS;
+    window.resolveSOS = resolveSOS;
+
+    // Add click event listener for buttons
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('ack-btn')) {
+            e.stopPropagation();
+        }
+        if (e.target && e.target.classList.contains('resolve-btn')) {
+            e.stopPropagation();
+        }
+    });
+
+    // Initialize map when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initMap);
+
+    // Also try to initialize staff info if Android interface becomes available later
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            if (!currentStaff) {
+                window.initStaffInfo();
+            }
+        }, 2000);
+    });
+</script>
+</body>
+</html>
