@@ -84,7 +84,8 @@
             android:orientation="horizontal"
             android:background="@drawable/info_card_bg"
             android:padding="16dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -147,5 +148,21 @@
                     android:lineSpacingMultiplier="1.2" />
             </LinearLayout>
         </LinearLayout>
+
+        <!-- End Assignment Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnEndAssignment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="End Assignment"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_end_bg"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:fontFamily="@font/inter_semibold" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

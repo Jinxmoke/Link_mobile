@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:background="#FFFFFF"
     android:paddingTop="0dp"
+    android:radius="15dp"
     android:paddingBottom="24dp">
 
     <!-- Header Section -->

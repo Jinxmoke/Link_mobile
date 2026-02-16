@@ -4,7 +4,6 @@ package com.example.link;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,13 +22,11 @@ import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +39,7 @@ public class MapFragment extends Fragment {
     private RequestQueue requestQueue;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private SharedPrefManager sharedPrefManager;
+    private boolean isFragmentActive = false;
 
     // JavaScript Interface Class for bidirectional communication
     public class JavaScriptInterface {
@@ -53,12 +51,14 @@ public class MapFragment extends Fragment {
 
         @JavascriptInterface
         public String getStaffId() {
+            if (!isFragmentValid()) return "STAFF001";
             sharedPrefManager = SharedPrefManager.getInstance(context);
             return String.valueOf(sharedPrefManager.getStaffId());
         }
 
         @JavascriptInterface
         public String getStaffName() {
+            if (!isFragmentValid()) return "Staff Member";
             sharedPrefManager = SharedPrefManager.getInstance(context);
             String name = sharedPrefManager.getStaffName();
             return name != null && !name.isEmpty() ? name : sharedPrefManager.getUsername();
@@ -66,12 +66,13 @@ public class MapFragment extends Fragment {
 
         @JavascriptInterface
         public String getStaffRole() {
+            if (!isFragmentValid()) return "STAFF";
             sharedPrefManager = SharedPrefManager.getInstance(context);
             String userType = sharedPrefManager.getUserType();
             if ("admin".equals(userType)) {
                 return "Administrator";
             } else if ("staff".equals(userType)) {
-                return "Responder";
+                return "STAFF";
             } else {
                 return "User";
             }
@@ -80,6 +81,10 @@ public class MapFragment extends Fragment {
         @JavascriptInterface
         public String getFullStaffInfo() {
             try {
+                if (!isFragmentValid()) {
+                    return "{\"id\":\"STAFF001\",\"name\":\"Staff Member\",\"role\":\"STAFF\",\"isLoggedIn\":false}";
+                }
+
                 sharedPrefManager = SharedPrefManager.getInstance(context);
                 JSONObject staffData = new JSONObject();
                 staffData.put("id", String.valueOf(sharedPrefManager.getStaffId()));
@@ -92,21 +97,20 @@ public class MapFragment extends Fragment {
                 staffData.put("userType", sharedPrefManager.getUserType());
                 return staffData.toString();
             } catch (JSONException e) {
-                e.printStackTrace();
-                return "{\"id\":\"STAFF001\",\"name\":\"Staff Member\",\"role\":\"Responder\",\"isLoggedIn\":false}";
+                return "{\"id\":\"STAFF001\",\"name\":\"Staff Member\",\"role\":\"STAFF\",\"isLoggedIn\":false}";
             }
         }
 
         @JavascriptInterface
         public boolean isLoggedIn() {
+            if (!isFragmentValid()) return false;
             sharedPrefManager = SharedPrefManager.getInstance(context);
             return sharedPrefManager.isLoggedIn();
         }
 
         @JavascriptInterface
         public void onMapReady() {
-            // Called when map is fully loaded in WebView
-            if (getActivity() != null) {
+            if (isFragmentValid() && getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     Toast.makeText(context, "Map ready with staff data", Toast.LENGTH_SHORT).show();
                 });
@@ -115,7 +119,7 @@ public class MapFragment extends Fragment {
 
         @JavascriptInterface
         public void showToast(String message) {
-            if (getActivity() != null) {
+            if (isFragmentValid() && getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                 });
@@ -167,13 +171,23 @@ public class MapFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
+                // Check if fragment is still attached
+                if (!isFragmentValid()) {
+                    return;
+                }
+
                 // Inject staff data immediately after page loads
                 injectStaffData();
 
-                Toast.makeText(requireContext(), "Emergency Response Map Loaded", Toast.LENGTH_SHORT).show();
+                showToast("Emergency Response Map Loaded", Toast.LENGTH_SHORT);
 
                 // Wait for map initialization
                 leafletWebView.postDelayed(() -> {
+                    // Double-check fragment is still attached before proceeding
+                    if (!isFragmentValid()) {
+                        return;
+                    }
+
                     // Get user location
                     checkLocationPermissionAndGetLocation();
 
@@ -196,7 +210,21 @@ public class MapFragment extends Fragment {
         leafletWebView.loadUrl("file:///android_asset/map.html");
     }
 
+    private boolean isFragmentValid() {
+        return isFragmentActive &&
+            isAdded() &&
+            !isDetached() &&
+            getContext() != null &&
+            getActivity() != null &&
+            !getActivity().isFinishing() &&
+            !getActivity().isDestroyed();
+    }
+
     private void injectStaffData() {
+        if (!isFragmentValid()) {
+            return;
+        }
+
         if (!sharedPrefManager.isLoggedIn()) {
             showToast("Please log in to access full features", Toast.LENGTH_SHORT);
             return;
@@ -243,24 +271,30 @@ public class MapFragment extends Fragment {
             staffId, staffName, staffRole
         );
 
-        leafletWebView.evaluateJavascript(javascript, value -> {
-            // JavaScript execution callback
-        });
+        if (leafletWebView != null) {
+            leafletWebView.evaluateJavascript(javascript, value -> {
+                // JavaScript execution callback
+            });
+        }
     }
 
     private String getStaffRole() {
+        if (!isFragmentValid()) return "STAFF";
+
         String userType = sharedPrefManager.getUserType();
         if ("admin".equals(userType)) {
             return "Administrator";
         } else if ("staff".equals(userType)) {
-            return "Responder";
+            return "STAFF";
         } else {
             return "User";
         }
     }
 
     private void checkLocationPermissionAndGetLocation() {
-        if (ContextCompat.checkSelfPermission(requireContext(),
+        if (!isFragmentValid()) return;
+
+        if (ContextCompat.checkSelfPermission(getContext(),
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             getUserLocation();
         } else {
@@ -276,7 +310,7 @@ public class MapFragment extends Fragment {
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && isFragmentValid()) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getUserLocation();
             } else {
@@ -287,14 +321,17 @@ public class MapFragment extends Fragment {
     }
 
     private void getUserLocation() {
-        if (ActivityCompat.checkSelfPermission(requireContext(),
+        if (!isFragmentValid()) return;
+
+        if (ActivityCompat.checkSelfPermission(getContext(),
             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             updateMapLocation(14.5995, 120.9842);
             return;
         }
 
-        fusedLocationClient.getLastLocation()
-            .addOnSuccessListener(requireActivity(), location -> {
+        Task<android.location.Location> locationTask = fusedLocationClient.getLastLocation();
+        locationTask.addOnSuccessListener(getActivity(), location -> {
+            if (isFragmentValid()) {
                 if (location != null) {
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
@@ -302,14 +339,19 @@ public class MapFragment extends Fragment {
                 } else {
                     updateMapLocation(14.5995, 120.9842);
                 }
-            })
-            .addOnFailureListener(e -> {
+            }
+        });
+        locationTask.addOnFailureListener(e -> {
+            if (isFragmentValid()) {
                 showToast("Failed to get location: " + e.getMessage(), Toast.LENGTH_SHORT);
                 updateMapLocation(14.5995, 120.9842);
-            });
+            }
+        });
     }
 
     private void updateMapLocation(double latitude, double longitude) {
+        if (!isFragmentValid() || leafletWebView == null) return;
+
         String javascript = String.format(
             "javascript:(function() {" +
                 "if (typeof window.MapFunctions !== 'undefined' && " +
@@ -327,17 +369,38 @@ public class MapFragment extends Fragment {
     }
 
     private void loadBaseStations() {
-        String url = ApiConfig.BASE_URL + "get_base_stations.php";
+        if (!isFragmentValid()) return;
+
+        sharedPrefManager = SharedPrefManager.getInstance(getContext());
+        int userId = sharedPrefManager.getUserId();
+        int staffId = sharedPrefManager.getStaffId();
+
+        // Build URL with user_id and staff_id
+        String url = ApiConfig.BASE_URL + "get_base_stations.php?user_id=" + userId;
+        if (staffId > 0) {
+            url += "&staff_id=" + staffId;
+        }
+
+        android.util.Log.d("MapFragment", "Loading base stations for user_id=" + userId + ", staff_id=" + staffId);
+        android.util.Log.d("MapFragment", "Base stations URL: " + url);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
             Request.Method.GET,
             url,
             null,
             response -> {
+                if (!isFragmentValid()) return;
+
                 try {
                     boolean success = response.getBoolean("success");
                     if (success) {
                         sendBaseStationsToMap(response.toString());
+
+                        // Log debug info
+                        if (response.has("debug")) {
+                            android.util.Log.d("MapFragment", "Base stations debug: " + response.getJSONObject("debug").toString());
+                        }
+
                         showToast("Base stations loaded successfully", Toast.LENGTH_SHORT);
                     } else {
                         String message = response.optString("message", "Unknown error");
@@ -345,10 +408,14 @@ public class MapFragment extends Fragment {
                     }
                 } catch (JSONException e) {
                     showToast("Error parsing base stations response", Toast.LENGTH_SHORT);
+                    android.util.Log.e("MapFragment", "Error parsing base stations", e);
                 }
             },
             error -> {
+                if (!isFragmentValid()) return;
+
                 showToast("Network error loading base stations", Toast.LENGTH_SHORT);
+                android.util.Log.e("MapFragment", "Network error loading base stations", error);
                 error.printStackTrace();
             }
         );
@@ -357,6 +424,8 @@ public class MapFragment extends Fragment {
     }
 
     private void sendBaseStationsToMap(String jsonData) {
+        if (!isFragmentValid() || leafletWebView == null) return;
+
         try {
             JSONObject response = new JSONObject(jsonData);
             if (response.getBoolean("success")) {
@@ -368,15 +437,8 @@ public class MapFragment extends Fragment {
 
                     JSONObject station = baseStationsArray.getJSONObject(i);
                     jsArray.append("{")
-                        .append("\"id\":").append(station.optString("id", "0")).append(",")
-                        .append("\"station_name\":\"").append(escapeJsonString(station.optString("station_name", "Station"))).append("\",")
                         .append("\"latitude\":").append(station.optDouble("latitude", 0)).append(",")
                         .append("\"longitude\":").append(station.optDouble("longitude", 0)).append(",")
-                        .append("\"status\":\"").append(escapeJsonString(station.optString("status", "unknown"))).append("\",")
-                        .append("\"address\":\"").append(escapeJsonString(station.optString("address", ""))).append("\",")
-                        .append("\"altitude\":").append(station.optDouble("altitude", 0)).append(",")
-                        .append("\"online_devices\":").append(station.optInt("online_devices", 0)).append(",")
-                        .append("\"total_devices\":").append(station.optInt("total_devices", 0))
                         .append("}");
                 }
                 jsArray.append("]");
@@ -402,16 +464,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private String escapeJsonString(String input) {
-        if (input == null) return "";
-        return input
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t");
-    }
-
     private String escapeJavaScriptString(String input) {
         if (input == null) return "";
         return input
@@ -423,7 +475,11 @@ public class MapFragment extends Fragment {
     }
 
     private void checkFirebaseConnection() {
+        if (!isFragmentValid() || leafletWebView == null) return;
+
         leafletWebView.postDelayed(() -> {
+            if (!isFragmentValid()) return;
+
             String javascript = "javascript:(function() {" +
                 "if (typeof window.checkFirebaseStatus === 'function') {" +
                 "   window.checkFirebaseStatus();" +
@@ -435,9 +491,9 @@ public class MapFragment extends Fragment {
     }
 
     private void showToast(String message, int duration) {
-        if (getActivity() != null) {
+        if (isFragmentValid() && getActivity() != null) {
             getActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), message, duration).show();
+                Toast.makeText(getContext(), message, duration).show();
             });
         }
     }
@@ -445,8 +501,11 @@ public class MapFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (leafletWebView != null) {
+        isFragmentActive = true;
+        if (leafletWebView != null && isFragmentValid()) {
             leafletWebView.postDelayed(() -> {
+                if (!isFragmentValid()) return;
+
                 // Refresh staff data
                 injectStaffData();
 
@@ -462,12 +521,26 @@ public class MapFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        // Clean up any resources if needed
+        isFragmentActive = false;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isFragmentActive = false;
+
+        // Clear WebView callbacks and references
+        if (leafletWebView != null) {
+            leafletWebView.setWebViewClient(null);
+            leafletWebView.destroy();
+            leafletWebView = null;
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        isFragmentActive = false;
         if (requestQueue != null) {
             requestQueue.cancelAll(this);
         }

@@ -871,14 +871,8 @@
                         // Update popup content
                         const popupContent = `
                             <div class="station-popup">
-                                <h4>${escapeHtml(station_name)}</h4>
-                                <p><strong>ID:</strong> ${escapeHtml(stationId)}</p>
                                 <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
                                 <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
-                                <p><strong>Address:</strong> ${escapeHtml(address || 'N/A')}</p>
-                                <p><strong>Altitude:</strong> ${altitude ? altitude.toFixed(2) : '0'}m</p>
-                                <p><strong>Status:</strong> ${escapeHtml(status || 'Active')}</p>
-                                <p><strong>Devices:</strong> ${online_devices || 0}/${total_devices || 0} online</p>
                             </div>
                         `;
 
@@ -899,14 +893,8 @@
                 const marker = L.marker([latitude, longitude], { icon })
                     .bindPopup(`
                         <div class="station-popup">
-                            <h4>${escapeHtml(station_name)}</h4>
-                            <p><strong>ID:</strong> ${escapeHtml(stationId)}</p>
                             <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
                             <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
-                            <p><strong>Address:</strong> ${escapeHtml(address || 'N/A')}</p>
-                            <p><strong>Altitude:</strong> ${altitude ? altitude.toFixed(2) : '0'}m</p>
-                            <p><strong>Status:</strong> ${escapeHtml(status || 'Active')}</p>
-                            <p><strong>Devices:</strong> ${online_devices || 0}/${total_devices || 0} online</p>
                         </div>
                     `);
 

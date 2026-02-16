@@ -1,6 +1,7 @@
 package com.example.link;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -21,15 +22,15 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private SharedPrefManager sharedPrefManager;
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
+    private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Log.d(TAG, "Notification permission granted");
                 setupFirebaseMessaging();
             } else {
                 Log.d(TAG, "Notification permission denied");
-                // Still setup Firebase even if permission denied
                 setupFirebaseMessaging();
             }
         });
@@ -37,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if permissions are required before showing main app
+        checkPermissions();
+
         setContentView(R.layout.activity_main);
 
         setupSystemUI();
@@ -44,6 +49,26 @@ public class MainActivity extends AppCompatActivity {
         loadDefaultFragment(savedInstanceState);
         loadBottomNavigation();
         requestNotificationPermission();
+    }
+
+    private void checkPermissions() {
+        sharedPrefManager = SharedPrefManager.getInstance(this);
+
+        // Check if we need to show permission screen
+        if (sharedPrefManager.shouldShowPermissionScreen()) {
+            // Redirect to PermissionActivity
+            Intent intent = new Intent(this, PermissionActivity.class);
+            intent.putExtra("from_main", true); // Flag to indicate coming from MainActivity
+            startActivity(intent);
+            finish(); // Close MainActivity
+            return;
+        }
+
+        // If permissions are missing but user skipped, show warning
+        if (sharedPrefManager.areCriticalPermissionsMissing()) {
+            Log.w(TAG, "Critical permissions missing, app may not function properly");
+            // You could show a warning dialog here
+        }
     }
 
     private void setupSystemUI() {
@@ -100,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "Requesting notification permission...");
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             } else {
                 Log.d(TAG, "Notification permission already granted");
                 setupFirebaseMessaging();
@@ -132,49 +157,25 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "═══════════════════════════════════════");
                     Log.d(TAG, "FCM Token (Device): " + token);
                     Log.d(TAG, "═══════════════════════════════════════");
-
-                    // TODO: Send this token to your server if you want to send
-                    // notifications to specific devices instead of using topics
-                    // sendTokenToServer(token);
-
                 } else {
                     Log.e(TAG, "Failed to get FCM token", task.getException());
                 }
             });
     }
 
-    // Optional: Send token to your PHP server for targeted notifications
-    private void sendTokenToServer(String token) {
-        // TODO: Implement this if you want to store FCM tokens in your database
-        // and send notifications to specific users/devices
-        /*
-        new Thread(() -> {
-            try {
-                URL url = new URL("https://yourdomain.com/api/store_fcm_token.php");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Check permissions again when returning to app
+        if (sharedPrefManager == null) {
+            sharedPrefManager = SharedPrefManager.getInstance(this);
+        }
 
-                JSONObject json = new JSONObject();
-                json.put("user_id", getUserId()); // Get from SharedPreferences
-                json.put("fcm_token", token);
-                json.put("device_type", "android");
-                json.put("device_model", Build.MODEL);
-
-                OutputStream os = conn.getOutputStream();
-                os.write(json.toString().getBytes());
-                os.flush();
-                os.close();
-
-                int responseCode = conn.getResponseCode();
-                Log.d(TAG, "Token sent to server, response: " + responseCode);
-
-                conn.disconnect();
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to send token to server", e);
-            }
-        }).start();
-        */
+        // If permissions were granted while app was in background
+        if (sharedPrefManager.shouldShowPermissionScreen()) {
+            Intent intent = new Intent(this, PermissionActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 }

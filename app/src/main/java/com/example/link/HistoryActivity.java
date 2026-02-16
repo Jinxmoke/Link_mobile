@@ -1,123 +1,201 @@
-package com.example.link; // Change to your actual package name
+package com.example.link;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
 
-    private TextView tvAvailableTitle;
     private TextView tvCountBadge;
-    private CardView historyCard;
+    private RecyclerView recyclerView;
+    private LinearLayout noDataLayout;
     private View btnBack;
+
+    private SOSAlertAdapter adapter;
+    private RequestQueue requestQueue;
+    private SharedPrefManager sharedPrefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_history); // Assuming your layout file is named activity_history.xml
+        setContentView(R.layout.activity_history);
 
-        // Initialize views
+        sharedPrefManager = SharedPrefManager.getInstance(this);
+        requestQueue = Volley.newRequestQueue(this);
+
         initializeViews();
-
-        // Set up click listeners
+        setupRecyclerView();
         setupClickListeners();
-
-        // You can load data here if needed
-        loadHistoryData();
+        loadResolvedSOS();
     }
 
     private void initializeViews() {
-        tvAvailableTitle = findViewById(R.id.tvAvailableTitle);
-        tvCountBadge = findViewById(R.id.tvCountBadge); // You'll need to add this ID to your count TextView
-        historyCard = findViewById(R.id.historyCard); // You'll need to add this ID to your CardView
         btnBack = findViewById(R.id.btnBack);
+        tvCountBadge = findViewById(R.id.tvCountBadge);
+        recyclerView = findViewById(R.id.recyclerView);
+        noDataLayout = findViewById(R.id.noDataLayout);
+    }
 
-        // Initialize other views if you have them
-        // For example, if you want to dynamically update the list items,
-        // you would need to add IDs to them in the layout
+    private void setupRecyclerView() {
+        adapter = new SOSAlertAdapter();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+        adapter.setOnItemClickListener(alert -> {
+            // Handle item click
+            String message = String.format("SOS Details:\nCustomer: %s\nDevice: %s\nResolved by: %s\nLocation: %s",
+                alert.getCustomerName(),
+                alert.getTransmitterSerial(),
+                alert.getResolvedByName(),
+                alert.getFormattedLocation());
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        });
     }
 
     private void setupClickListeners() {
-        // Back button click listener
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
+        btnBack.setOnClickListener(v -> onBackPressed());
+    }
+
+    private void loadResolvedSOS() {
+        int userId = sharedPrefManager.getUserId();
+        int staffId = sharedPrefManager.getStaffId();
+
+        if (userId == 0) {
+            showError("User not logged in");
+            return;
+        }
+
+        // Build URL with user_id and staff_id
+        String url = ApiConfig.GET_RESOLVED_SOS_URL + "?user_id=" + userId;
+        if (staffId > 0) {
+            url += "&staff_id=" + staffId;
+        }
+
+        android.util.Log.d("HistoryActivity", "Loading resolved SOS from: " + url);
+
+        JsonObjectRequest request = new JsonObjectRequest(
+            Request.Method.GET,
+            url,
+            null,
+            response -> {
+                try {
+                    android.util.Log.d("HistoryActivity", "Response: " + response.toString());
+
+                    boolean success = response.getBoolean("success");
+                    if (success) {
+                        int count = response.getInt("count");
+                        JSONArray alertsArray = response.getJSONArray("alerts");
+
+                        List<SOSAlert> alerts = new ArrayList<>();
+                        for (int i = 0; i < alertsArray.length(); i++) {
+                            JSONObject alertObj = alertsArray.getJSONObject(i);
+
+                            SOSAlert alert = new SOSAlert(
+                                alertObj.getInt("id"),
+                                alertObj.getString("transmitter_serial"),
+                                alertObj.getInt("assignment_id"),
+                                alertObj.getString("customer_name"),
+                                alertObj.optString("customer_contact", ""),
+                                alertObj.getDouble("latitude"),
+                                alertObj.getDouble("longitude"),
+                                alertObj.getInt("battery_percent"),
+                                alertObj.getInt("rssi"),
+                                alertObj.getString("alert_time"),
+                                alertObj.optString("acknowledged_at", null),
+                                alertObj.optString("acknowledged_by_name", "Unknown"),
+                                alertObj.optString("resolved_at", null),
+                                alertObj.optString("resolved_by_name", "Unknown"),
+                                alertObj.optString("resolution_notes", "")
+                            );
+
+                            alerts.add(alert);
+                        }
+
+                        updateUI(alerts, count);
+                    } else {
+                        String message = response.optString("message", "Failed to load data");
+                        showError(message);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    android.util.Log.e("HistoryActivity", "Parse error: " + e.getMessage());
+                    showError("Error parsing response");
+                }
+            },
+            error -> {
+                android.util.Log.e("HistoryActivity", "Network error: " + error.toString());
+
+                String errorMessage = "Network error. Please check your connection.";
+
+                if (error.networkResponse != null) {
+                    try {
+                        String responseBody = new String(error.networkResponse.data, "utf-8");
+                        android.util.Log.e("HistoryActivity", "Error response: " + responseBody);
+
+                        JSONObject errorJson = new JSONObject(responseBody);
+                        if (errorJson.has("message")) {
+                            errorMessage = errorJson.getString("message");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                showError(errorMessage);
             }
-        });
+        );
 
-        // You can add click listeners to individual history items
-        // First, you need to add IDs to each item container in your layout
-        // For example: android:id="@+id/item1", "@+id/item2", "@+id/item3"
+        // Set timeout to 15 seconds
+        request.setRetryPolicy(new com.android.volley.DefaultRetryPolicy(
+            15000,
+            0,
+            com.android.volley.DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
 
-        // Example:
-        // View item1 = findViewById(R.id.item1);
-        // item1.setOnClickListener(new View.OnClickListener() {
-        //     @Override
-        //     public void onClick(View v) {
-        //         // Handle item click
-        //         showToast("Clicked on Michael James Ochea's emergency");
-        //     }
-        // });
+        requestQueue.add(request);
     }
 
-    private void loadHistoryData() {
-        // This is where you would load real data from your data source
-        // For now, we're using static data from the layout
+    private void updateUI(List<SOSAlert> alerts, int count) {
+        tvCountBadge.setText(String.valueOf(count));
 
-        // You could update the count badge based on real data
-        // tvCountBadge.setText(String.valueOf(getEmergencyCount()));
-
-        // Or update the title based on some condition
-        // tvAvailableTitle.setText(getCustomTitle());
+        if (alerts.isEmpty()) {
+            noDataLayout.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            noDataLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            adapter.setAlerts(alerts);
+        }
     }
 
-    // Example methods for data manipulation
-    private int getEmergencyCount() {
-        // Return actual count from your data source
-        return 4; // This is the hardcoded value from your layout
-    }
-
-    private String getCustomTitle() {
-        // Return custom title based on your logic
-        return "Assigned Customer (SOS)";
-    }
-
-    private void showToast(String message) {
+    private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        noDataLayout.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        tvCountBadge.setText("0");
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        // You can add custom back press animation or logic here
-        // overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-    }
-
-    // If you want to update the UI dynamically, you can create methods like:
-    public void updateEmergencyCount(int count) {
-        if (tvCountBadge != null) {
-            tvCountBadge.setText(String.valueOf(count));
+    protected void onDestroy() {
+        super.onDestroy();
+        if (requestQueue != null) {
+            requestQueue.cancelAll(this);
         }
     }
-
-    public void setTitleText(String title) {
-        if (tvAvailableTitle != null) {
-            tvAvailableTitle.setText(title);
-        }
-    }
-
-    // You might want to handle item clicks in a RecyclerView instead
-    // Consider converting to RecyclerView if you have dynamic data
-    /*
-    private void setupRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        HistoryAdapter adapter = new HistoryAdapter(getHistoryItems());
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-    }
-    */
 }

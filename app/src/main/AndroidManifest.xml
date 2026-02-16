@@ -4,15 +4,19 @@
     package="com.example.link">
 
     <!-- Permissions -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Add this for SOS vibrations -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Add this for full-screen notifications -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Camera features (optional) -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.location.network" android:required="false" />
 
@@ -27,28 +31,33 @@
         android:theme="@style/Theme.LINK"
         tools:targetApi="31">
 
-        <!-- Login Screen (Launcher) -->
+        <!-- PERMISSION SCREEN (New Launcher) -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".PermissionActivity"
             android:exported="true"
-            android:theme="@style/Theme.LINK">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Main Screen (After Login) - UPDATED FOR SOS INTENT -->
+        <!-- Login Screen -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Main Screen (After Login) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop"> <!-- Add launchMode -->
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop">
             <intent-filter>
-                <!-- Add this intent filter for SOS notifications -->
                 <action android:name="SOS_ALERT_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <!-- Add these for deep linking from notifications -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -59,37 +68,23 @@
 
         <activity
             android:name=".CustomerActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".HistoryActivity"
-            android:exported="false" />
-
-        <!-- Firebase Messaging Service -->
-        <service
-            android:name=".MyFirebaseMessagingService"
             android:exported="false"
-            android:stopWithTask="false"> <!-- Keep service running even if app is swiped away -->
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
+            android:screenOrientation="portrait" />
 
-        <!-- Default notification channels -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="fcm_default_channel" />
-
-        <!-- SOS Alarm Receiver for persistent alerts -->
-        <receiver
-            android:name=".SOSAlarmReceiver"
-            android:exported="false" />
-
-        <!-- Foreground Service for SOS alerts (optional) -->
-        <service
-            android:name=".SOSForegroundService"
+        <activity
+            android:name=".ChangePasswordActivity"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".DeviceLocationActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
     </application>
 
