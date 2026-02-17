@@ -21,6 +21,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+
     <style>
         html, body, #map {
             height: 100%;
@@ -33,6 +35,176 @@
             width: 100%;
         }
 
+        /* Modern Legend Styles - Updated from your design */
+        #mapLegend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            width: 240px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        #mapLegend.collapsed {
+            transform: translateY(calc(100% - 50px));
+        }
+
+        .legend-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        .legend-header span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            letter-spacing: 0.3px;
+        }
+
+        .legend-header small {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .legend-content {
+            transition: all 0.3s ease;
+            opacity: 1;
+            max-height: 400px;
+        }
+
+        .legend-content.hidden {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .legend-item-clickable {
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+
+        .legend-item-clickable:hover {
+            background-color: rgba(241, 245, 249, 0.8);
+            transform: translateX(2px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+        }
+
+        .legend-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-dot.cyan {
+            background: #06b6d4;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+        }
+
+        .legend-dot.red {
+            background: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        .legend-dot.green {
+            background: #10b981;
+        }
+
+        .legend-dot.slate {
+            background: #64748b;
+        }
+
+        .legend-dot.blue {
+            background: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+        }
+
+        .legend-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .legend-stat {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .legend-stat.cyan-bg {
+            background: rgba(6, 182, 212, 0.1);
+            color: #0891b2;
+        }
+
+        .legend-stat.red-bg {
+            background: rgba(239, 68, 68, 0.1);
+            color: #b91c1c;
+        }
+
+        .legend-stat.green-bg {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+
+        .legend-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+            margin: 12px 0 8px 0;
+        }
+
+        .legend-footer {
+            font-size: 9px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                opacity: 0.8;
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .pulse-ring {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Keep all your existing styles below */
         .legend {
             padding: 10px 12px;
             font: 14px Arial, Helvetica, sans-serif;
@@ -131,12 +303,6 @@
             line-height: 1.6;
         }
 
-        .staff-info {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed #e0e0e0;
-        }
-
         .stat-item {
             display: flex;
             justify-content: space-between;
@@ -172,7 +338,7 @@
             50% { opacity: 0.5; }
         }
 
-        @keyframes pulse {
+        @keyframes pulse-old {
             0% { transform: scale(0.8); opacity: 0.7; }
             50% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(0.8); opacity: 0.7; }
@@ -353,7 +519,7 @@
 
         .firebase-status {
             position: absolute;
-            bottom: 80px;
+            bottom: 30px;
             left: 10px;
             background: rgba(255,255,255,0.95);
             padding: 6px 10px;
@@ -405,14 +571,412 @@
         }
 
         .toastify {
-            border-radius: 12px; /* adjust as you like */
+            border-radius: 12px;
             margin-top: 20px;
+        }
+
+        /* Remove white background from popups - Updated styling */
+        .leaflet-popup-content-wrapper {
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 12px !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            min-width: 280px;
+        }
+
+        .leaflet-popup-tip {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* Modern popup styling with backdrop blur */
+        .modern-popup {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 16px !important;
+            padding: 16px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+            color: #1e293b !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        .modern-popup.sos {
+            background: white;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .modern-popup.sos h4 {
+            color: #b91c1c !important;
+        }
+
+        .modern-popup.acknowledged {
+            background: white;
+            border: 1px solid rgba(245, 158, 11, 0.3) !important;
+        }
+
+        .modern-popup.acknowledged h4 {
+            color: #b45309 !important;
+        }
+
+        .modern-popup h4 {
+            margin: 0 0 12px 0 !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+            padding-bottom: 8px !important;
+        }
+
+        .modern-popup p {
+            margin: 8px 0 !important;
+            font-size: 13px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+
+        .modern-popup p strong {
+            font-weight: 600 !important;
+            color: #475569 !important;
+        }
+
+        .modern-popup .badge {
+            display: inline-block !important;
+            padding: 4px 12px !important;
+            border-radius: 20px !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        .modern-popup .badge.online {
+            background: rgba(34, 197, 94, 0.2) !important;
+            color: #166534 !important;
+        }
+
+        .modern-popup .badge.sos {
+            background: rgba(239, 68, 68, 0.2) !important;
+            color: #b91c1c !important;
+            animation: blink 1s infinite !important;
+        }
+
+        .modern-popup .badge.acknowledged {
+            background: rgba(245, 158, 11, 0.2) !important;
+            color: #b45309 !important;
+        }
+
+        .modern-popup .metrics-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            margin-top: 12px !important;
+        }
+
+        .modern-popup .metric-item {
+            background: rgb(254 222 222 / 50%) !important;
+            border-radius: 12px !important;
+            padding: 8px !important;
+            text-align: center !important;
+        }
+
+        .modern-popup .metric-label {
+            font-size: 10px !important;
+            color: #64748b !important;
+            margin-bottom: 2px !important;
+        }
+
+        .modern-popup .metric-value {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #0f172a !important;
+        }
+
+        .modern-popup .timestamp {
+            margin-top: 12px !important;
+            font-size: 10px !important;
+            color: #64748b !important;
+            text-align: right !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+            padding-top: 8px !important;
+        }
+
+        .modern-popup button {
+            width: 100% !important;
+            margin-top: 12px !important;
+            padding: 10px !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        .modern-popup button.ack-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+        }
+
+        .modern-popup button.ack-btn:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+        }
+
+        .modern-popup button.resolve-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+            color: white !important;
+        }
+
+        .modern-popup button.resolve-btn:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
+        }
+
+        /* Keep original marker styles */
+        .custom-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        /* ===== HEADER ROW ===== */
+        .sos-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .serial {
+            font-weight: 700;
+            font-size: 12px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .badge.sos {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 999px;
+            line-height: 1;
+        }
+
+        .ack-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        /* Update these CSS styles */
+        .legend-toggle {
+            position: absolute;
+            bottom: 80px;
+            left: 340px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 20%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            color: #334155;
+        }
+
+        .legend-toggle:hover {
+            transform: scale(1.05);
+            background: white;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-toggle.legend-visible {
+            opacity: 0.8;
+            transform: translateX(0);
+        }
+
+        .legend-toggle.legend-hidden {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        #mapLegend {
+            position: absolute;
+            bottom: 500px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            width: 220px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        #mapLegend.hidden-legend {
+            transform: translateX(-120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .legend-close-btn {
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 5px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .legend-close-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 135px;
+            left: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1001;
+        }
+
+        .zoom-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 20px;
+            color: #334155;
+        }
+
+        .zoom-btn:hover {
+            transform: scale(1.05);
+            background: white;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Geofence Circle Styles - Simple dashed circle only */
+        .geofence-circle {
+            stroke: #8b5cf6;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            fill: rgba(139, 92, 246, 0.05);
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 <div id="map"></div>
-<div id="staffBadge" class="staff-badge" style="display: none;">Loading staff info...</div>
+
+<!-- Zoom Controls -->
+<div class="zoom-controls">
+    <div class="zoom-btn" onclick="zoomIn()">+</div>
+    <div class="zoom-btn" onclick="zoomOut()">−</div>
+</div>
+
+<!-- Modern Legend Component - Unchanged -->
+<div id="mapLegend" class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-gray-200 w-56 z-[1000] transition-all duration-300 legend-visible">
+    <div class="legend-header" onclick="toggleLegend()">
+        <span>Map Legend</span>
+        <small>Click to zoom</small>
+    </div>
+
+    <div id="legendContent" class="legend-content">
+        <div class="legend-item-clickable" onclick="zoomToMarkerType('transmitter')">
+            <div class="legend-item">
+                <div class="legend-left">
+                    <div class="legend-dot cyan"></div>
+                    <span class="legend-text">Live Transmitters</span>
+                </div>
+                <span id="liveTransmittersCount" class="legend-stat cyan-bg">0</span>
+            </div>
+        </div>
+
+        <div class="legend-item-clickable" onclick="zoomToMarkerType('sos')">
+            <div class="legend-item">
+                <div class="legend-left">
+                    <div class="legend-dot red pulse-ring"></div>
+                    <span class="legend-text">SOS Alerts</span>
+                </div>
+                <span id="sosAlertsCount" class="legend-stat red-bg">0</span>
+            </div>
+        </div>
+
+        <div class="legend-item-clickable" onclick="zoomToMarkerType('acknowledged')">
+            <div class="legend-item">
+                <div class="legend-left">
+                    <div class="legend-dot green"></div>
+                    <span class="legend-text">Acknowledged</span>
+                </div>
+                <span id="acknowledgedCount" class="legend-stat green-bg">0</span>
+            </div>
+        </div>
+
+        <div class="legend-divider"></div>
+
+        <div class="legend-item">
+            <div class="legend-left">
+                <div class="legend-dot slate"></div>
+                <span class="legend-text">Base Station</span>
+            </div>
+        </div>
+
+        <div class="legend-item">
+            <div class="legend-left">
+                <div class="legend-dot blue"></div>
+                <span class="legend-text">Your Location</span>
+            </div>
+        </div>
+
+        <div class="legend-footer">
+            Last updated: <span id="lastUpdateTime">Just now</span>
+        </div>
+    </div>
+</div>
+
+<!-- Add this button right after the mapLegend div, before the staff badge -->
+<div id="mapLegendToggle" class="legend-toggle" onclick="toggleLegendVisibility()">
+    <span><i class="fas fa-layer-group text-xs"></i></span>
+</div>
+
 <div id="firebaseStatus" class="firebase-status">
     <span id="firebaseStatusText">Connecting to Firebase...</span>
 </div>
@@ -439,7 +1003,8 @@
     // Global variables
     let map;
     let transmitterMarkers = {};
-    let activeSOSAlerts = {};
+    let activeSOSAlerts = {};      // Active (red) SOS markers
+    let acknowledgedMarkers = {};   // Acknowledged (orange) SOS markers
     let activeSOSSerials = new Set();
     let acknowledgedSOSSerials = new Set();
     let resolvedSOSSerials = new Set();
@@ -456,9 +1021,116 @@
     let userLocationMarker = null;
     let isMapInitialized = false;
     let currentStaff = null;
+    let legendCollapsed = false;
 
-    // Track base stations to prevent duplicates
+    // Track base stations and geofences
     let baseStations = {};
+    let geofenceCircles = {};
+
+    // Toggle legend visibility (completely hide/show)
+    window.toggleLegendVisibility = function() {
+        const legend = document.getElementById('mapLegend');
+        const toggleBtn = document.getElementById('mapLegendToggle');
+
+        if (legend.classList.contains('hidden-legend')) {
+            // Show legend
+            legend.classList.remove('hidden-legend');
+            toggleBtn.classList.add('visible');
+            toggleBtn.innerHTML = '<i class="fas fa-layer-group text-xs"></i>';
+            // Save preference
+            localStorage.setItem('legendHidden', 'false');
+        } else {
+            // Hide legend
+            legend.classList.add('hidden-legend');
+            toggleBtn.classList.remove('visible');
+            toggleBtn.innerHTML = '<i class="fas fa-layer-group text-xs"></i>️';
+            // Save preference
+            localStorage.setItem('legendHidden', 'true');
+        }
+    };
+
+    // Initialize legend visibility based on saved preference
+    function initLegendVisibility() {
+        const legend = document.getElementById('mapLegend');
+        const toggleBtn = document.getElementById('mapLegendToggle');
+
+        // Check if user has a saved preference
+        const legendHidden = localStorage.getItem('legendHidden') === 'true';
+
+        if (legendHidden) {
+            legend.classList.add('hidden-legend');
+            toggleBtn.classList.remove('visible');
+            toggleBtn.innerHTML = '🗺️';
+        } else {
+            legend.classList.remove('hidden-legend');
+            toggleBtn.classList.add('visible');
+            toggleBtn.innerHTML = '📋';
+        }
+    }
+
+    // Zoom to marker type function
+    window.zoomToMarkerType = function(type) {
+        if (!map) return;
+
+        let bounds = [];
+
+        switch(type) {
+            case 'transmitter':
+                Object.values(transmitterMarkers).forEach(marker => {
+                    if (marker && marker.getLatLng) {
+                        bounds.push(marker.getLatLng());
+                    }
+                });
+                break;
+            case 'sos':
+                // Only zoom to active SOS markers
+                Object.values(activeSOSAlerts).forEach(marker => {
+                    if (marker && marker.getLatLng) {
+                        bounds.push(marker.getLatLng());
+                    }
+                });
+                break;
+            case 'acknowledged':
+                // Zoom to acknowledged markers
+                Object.values(acknowledgedMarkers).forEach(marker => {
+                    if (marker && marker.getLatLng) {
+                        bounds.push(marker.getLatLng());
+                    }
+                });
+                break;
+        }
+
+        if (bounds.length > 0) {
+            const group = L.featureGroup(bounds.map(latlng => L.marker(latlng)));
+            map.fitBounds(group.getBounds().pad(0.1));
+        } else {
+            // Optional: Show toast if no markers of that type
+            showToast(`No ${type} markers found`, 'info');
+        }
+    };
+
+    // Zoom functions
+    window.zoomIn = function() {
+        if (map) {
+            map.setZoom(map.getZoom() + 1);
+        }
+    };
+
+    window.zoomOut = function() {
+        if (map) {
+            map.setZoom(map.getZoom() - 1);
+        }
+    };
+
+    // Update last updated time
+    function updateLastUpdatedTime() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const lastUpdateEl = document.getElementById('lastUpdateTime');
+        if (lastUpdateEl) {
+            lastUpdateEl.textContent = timeStr;
+        }
+    }
 
     /**
      * STAFF INFORMATION MANAGEMENT
@@ -536,15 +1208,6 @@
             staffBadge.style.display = 'block';
             staffBadge.textContent = `${currentStaff.name} (${currentStaff.role})`;
         }
-
-        // REMOVE staff info from legend entirely
-        const legendStats = document.querySelector('.legend-stats');
-        if (legendStats) {
-            const existingStaffInfo = legendStats.querySelector('.staff-info');
-            if (existingStaffInfo) {
-                existingStaffInfo.remove();
-            }
-        }
     }
 
     function checkStaffLogin() {
@@ -590,6 +1253,7 @@
                     ackBy: currentStaff,
                     assignment_id: assignmentId
                 };
+                // Remove from active SOS markers - will be added as acknowledged marker separately
                 removeSOSMarker(serialNumber);
             }
         },
@@ -693,7 +1357,7 @@
         });
         map.addLayer(markerCluster);
 
-        addLegend();
+        // Initialize Firebase listeners (legend stats will be updated via these)
         initializeFirebaseListeners();
 
         // Initialize staff info
@@ -709,74 +1373,6 @@
                 console.log("Android interface not fully available");
             }
         }
-    }
-
-    function addLegend() {
-        const legendDiv = document.createElement('div');
-        legendDiv.id = 'map-legend';
-        legendDiv.className = 'legend';
-        let isCollapsed = false;
-
-        legendDiv.innerHTML = `
-            <h4>
-                <span>Map Legend</span>
-                <button class="legend-minimize-btn" id="minimizeBtn">−</button>
-            </h4>
-            <div class="legend-content" id="legendContent">
-                <div class="legend-item">
-                    <div class="legend-icon" style="background: #64748b;"></div>
-                    <span class="legend-text">Base Station</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon" style="background: #22d3ee;"></div>
-                    <span class="legend-text">Transmitter</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon" style="background: #3b82f6;"></div>
-                    <span class="legend-text">User Location</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon" style="background: #F44336;"></div>
-                    <span class="legend-text">SOS Alert</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon" style="background: #FF9800;"></div>
-                    <span class="legend-text">SOS Acknowledged</span>
-                </div>
-                <div class="legend-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Live:</span>
-                        <span id="onlineCount" class="stat-value">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">SOS:</span>
-                        <span id="sosCount" class="stat-value sos-stat">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Acknowledge:</span>
-                        <span id="acknowledgedCount" class="stat-value">0</span>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(legendDiv);
-        makeLegendDraggable(legendDiv);
-
-        const minimizeBtn = legendDiv.querySelector('#minimizeBtn');
-        const legendContent = legendDiv.querySelector('#legendContent');
-
-        minimizeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            isCollapsed = !isCollapsed;
-            if (isCollapsed) {
-                legendContent.classList.add('collapsed');
-                minimizeBtn.textContent = '+';
-            } else {
-                legendContent.classList.remove('collapsed');
-                minimizeBtn.textContent = '−';
-            }
-        });
     }
 
     function makeLegendDraggable(legendElement) {
@@ -832,10 +1428,10 @@
         userLocationMarker = L.marker([latitude, longitude], { icon })
             .addTo(map)
             .bindPopup(`
-                <div class="station-popup">
+                <div class="modern-popup">
                     <h4>Your Location</h4>
-                    <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
-                    <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
+                    <p><strong>Latitude:</strong> <span class="value">${latitude.toFixed(6)}</span></p>
+                    <p><strong>Longitude:</strong> <span class="value">${longitude.toFixed(6)}</span></p>
                 </div>
             `);
     };
@@ -846,11 +1442,95 @@
             return;
         }
 
-        console.log(`[Map] Adding ${baseStationsArray.length} base station(s)`);
+        // ─────────────────────────────────────────────────────────────────────────────
+// ADD THIS ENTIRE FUNCTION to map.html, right after the
+// window.MapFunctions.addBaseStationMarkers = function(...) { ... }; block
+// ─────────────────────────────────────────────────────────────────────────────
+
+    window.MapFunctions.zoomToAlert = function(latitude, longitude, serial, alertType, name) {
+        if (!map || !isMapInitialized) {
+            console.warn('[zoomToAlert] Map not ready yet, will be retried by Android');
+            return;
+        }
+
+        var lat = parseFloat(latitude);
+        var lng = parseFloat(longitude);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            console.error('[zoomToAlert] Invalid coordinates:', latitude, longitude);
+            return;
+        }
+
+        console.log('[zoomToAlert] Zooming to', alertType, serial, lat, lng);
+
+        // 1. Fly to the location at a close zoom
+        map.setView([lat, lng], 17, { animate: true });
+
+        // 2. Try to find and open the exact marker for this serial number.
+        //    We check both active SOS markers and acknowledged markers.
+        var markerFound = false;
+
+        // Check active SOS markers  (key format: "sos_<serial>")
+        var sosKey = 'sos_' + serial;
+        if (activeSOSAlerts[sosKey]) {
+            activeSOSAlerts[sosKey].openPopup();
+            markerFound = true;
+            console.log('[zoomToAlert] Opened active SOS popup for', serial);
+        }
+
+        // Check acknowledged markers  (key format: "ack_<serial>")
+        if (!markerFound) {
+            var ackKey = 'ack_' + serial;
+            if (acknowledgedMarkers[ackKey]) {
+                acknowledgedMarkers[ackKey].openPopup();
+                markerFound = true;
+                console.log('[zoomToAlert] Opened acknowledged popup for', serial);
+            }
+        }
+
+        // Check regular transmitter markers (online devices that haven't
+        // fired SOS yet — uncommon but possible for geofence alerts)
+        if (!markerFound && transmitterMarkers[serial]) {
+            // Transmitter markers are inside a cluster; un-cluster first
+            markerCluster.zoomToShowLayer(transmitterMarkers[serial], function() {
+                transmitterMarkers[serial].openPopup();
+            });
+            markerFound = true;
+            console.log('[zoomToAlert] Opened transmitter popup for', serial);
+        }
+
+        if (!markerFound) {
+            console.warn('[zoomToAlert] No marker found for serial', serial,
+                '— map is centred on coordinates but no popup opened.');
+        }
+
+        // 3. Show a Toastify banner so the user knows why the map jumped
+        var label = alertType === 'geofence' ? '⚠️ Geofence Alert' : '🚨 SOS Alert';
+        var toastMsg = label + (name ? ': ' + name : '') + (serial ? ' (' + serial + ')' : '');
+        showToast(toastMsg, alertType === 'geofence' ? 'warning' : 'error');
+    };
+
+
+        console.log(`[Map] Adding ${baseStationsArray.length} base station(s) with geofences`);
+
+        // Clear existing geofence circles
+        Object.values(geofenceCircles).forEach(circle => {
+            if (map) map.removeLayer(circle);
+        });
+        geofenceCircles = {};
 
         baseStationsArray.forEach(station => {
             try {
-                const { id, station_name, latitude, longitude, status, address, altitude, online_devices, total_devices } = station;
+                const {
+                    id,
+                    station_name,
+                    latitude,
+                    longitude,
+                    status,
+                    address,
+                    altitude,
+                    geofence_radius_m
+                } = station;
 
                 // Validate coordinates
                 if (!latitude || !longitude || latitude === 0 && longitude === 0) {
@@ -868,21 +1548,36 @@
                     if (baseStations[stationId].marker) {
                         baseStations[stationId].marker.setLatLng([latitude, longitude]);
 
-                        // Update popup content
+                        // Update popup content - removed online/total devices
                         const popupContent = `
-                            <div class="station-popup">
-                                <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
-                                <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
+                            <div class="modern-popup">
+                                <h4>${escapeHtml(station_name || 'Base Station')}</h4>
+                                <p><strong>Status:</strong> <span class="badge ${status === 'online' ? 'online' : 'offline'}">${status || 'Unknown'}</span></p>
+                                <p><strong>Latitude:</strong> <span class="value">${parseFloat(latitude).toFixed(6)}</span></p>
+                                <p><strong>Longitude:</strong> <span class="value">${parseFloat(longitude).toFixed(6)}</span></p>
+                                ${address ? `<p><strong>Address:</strong> <span class="value">${escapeHtml(address)}</span></p>` : ''}
+                                ${altitude ? `<p><strong>Altitude:</strong> <span class="value">${altitude}m</span></p>` : ''}
+                                ${geofence_radius_m ? `<p><strong>Geofence:</strong> <span class="value">${geofence_radius_m}m radius</span></p>` : ''}
+                                <div class="timestamp">Base station location</div>
                             </div>
                         `;
-
                         baseStations[stationId].marker.getPopup().setContent(popupContent);
+                    }
+
+                    // Update geofence circle
+                    if (geofenceCircles[stationId] && map) {
+                        map.removeLayer(geofenceCircles[stationId]);
+                    }
+
+                    // Add geofence circle if radius is provided - simple dashed circle only
+                    if (geofence_radius_m && geofence_radius_m > 0) {
+                        addGeofenceCircle(stationId, latitude, longitude, geofence_radius_m);
                     }
 
                     return;
                 }
 
-                // Create new marker
+                // Create new marker with simplified popup (no online/total devices)
                 const icon = L.divIcon({
                     className: 'custom-div-icon',
                     html: `<div style="background-color: #64748b; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>`,
@@ -890,15 +1585,28 @@
                     iconAnchor: [7, 7]
                 });
 
+                const popupContent = `
+                    <div class="modern-popup">
+                        <h4>${escapeHtml(station_name || 'Base Station')}</h4>
+                        <p><strong>Status:</strong> <span class="badge ${status === 'online' ? 'online' : 'offline'}">${status || 'Unknown'}</span></p>
+                        <p><strong>Latitude:</strong> <span class="value">${parseFloat(latitude).toFixed(6)}</span></p>
+                        <p><strong>Longitude:</strong> <span class="value">${parseFloat(longitude).toFixed(6)}</span></p>
+                        ${address ? `<p><strong>Address:</strong> <span class="value">${escapeHtml(address)}</span></p>` : ''}
+                        ${altitude ? `<p><strong>Altitude:</strong> <span class="value">${altitude}m</span></p>` : ''}
+                        ${geofence_radius_m ? `<p><strong>Geofence:</strong> <span class="value">${geofence_radius_m}m radius</span></p>` : ''}
+                        <div class="timestamp">Base station location</div>
+                    </div>
+                `;
+
                 const marker = L.marker([latitude, longitude], { icon })
-                    .bindPopup(`
-                        <div class="station-popup">
-                            <p><strong>Lat:</strong> ${latitude.toFixed(6)}</p>
-                            <p><strong>Lng:</strong> ${longitude.toFixed(6)}</p>
-                        </div>
-                    `);
+                    .bindPopup(popupContent);
 
                 markerCluster.addLayer(marker);
+
+                // Add geofence circle if radius is provided - simple dashed circle only
+                if (geofence_radius_m && geofence_radius_m > 0) {
+                    addGeofenceCircle(stationId, latitude, longitude, geofence_radius_m);
+                }
 
                 // Store in tracking object
                 baseStations[stationId] = {
@@ -906,13 +1614,31 @@
                     data: station
                 };
 
-                console.log(`[Map] Added base station: ${station_name} (${stationId})`);
+                console.log(`[Map] Added base station: ${station_name} (${stationId}) with geofence radius ${geofence_radius_m || 500}m`);
 
             } catch (error) {
                 console.error('Error adding marker for station:', error);
             }
         });
     };
+
+    // Function to add geofence circle - simple dashed circle only, no tooltip
+    function addGeofenceCircle(stationId, lat, lng, radiusMeters) {
+        if (!map) return;
+
+        const circle = L.circle([lat, lng], {
+            radius: radiusMeters,
+            color: '#8b5cf6',
+            weight: 2,
+            opacity: 0.6,
+            fillColor: '#8b5cf6',
+            fillOpacity: 0.05,
+            dashArray: '5, 5',
+            className: 'geofence-circle'
+        }).addTo(map);
+
+        geofenceCircles[stationId] = circle;
+    }
 
     /**
      * SOS ACKNOWLEDGMENT FUNCTION - WITH STAFF VALIDATION
@@ -1125,9 +1851,10 @@
         let backgroundColor;
         switch(type) {
             case 'success':
-                backgroundColor = "#DC3545";
-            case 'error':
                 backgroundColor = "#198754";
+                break;
+            case 'error':
+                backgroundColor = "#DC3545";
                 break;
             case 'warning':
                 backgroundColor = "#FFC107";
@@ -1307,6 +2034,17 @@
             const assignments = snapshot.val();
             sosAlerts = 0;
 
+            // Clear existing SOS markers first
+            Object.keys(activeSOSAlerts).forEach(key => {
+                map.removeLayer(activeSOSAlerts[key]);
+                delete activeSOSAlerts[key];
+            });
+
+            Object.keys(acknowledgedMarkers).forEach(key => {
+                map.removeLayer(acknowledgedMarkers[key]);
+                delete acknowledgedMarkers[key];
+            });
+
             if (assignments) {
                 Object.keys(assignments).forEach(assignmentId => {
                     const alerts = assignments[assignmentId];
@@ -1346,31 +2084,11 @@
                 });
             }
 
-            // Clean up markers for devices that are no longer in SOS
-            Object.keys(activeSOSAlerts).forEach(markerId => {
-                const serialNumber = markerId.replace('sos_', '');
-                let found = false;
-
-                if (assignments) {
-                    Object.keys(assignments).forEach(assignmentId => {
-                        if (assignments[assignmentId] && assignments[assignmentId][serialNumber]) {
-                            const alert = assignments[assignmentId][serialNumber];
-                            if (!alert.resolved) {
-                                found = true;
-                            }
-                        }
-                    });
-                }
-
-                if (!found) {
-                    removeSOSMarker(serialNumber);
-                }
-            });
-
             updateCounts();
         });
     }
 
+    // Transmitter marker function with modern popup styling
     function updateTransmitterOnMap(serialNumber, locationData, assignmentId, deviceData) {
         const { latitude, longitude, battery_percent, rssi, counter, assigned_name, status, isSos } = locationData;
 
@@ -1397,19 +2115,28 @@
             // Update existing marker
             transmitterMarkers[serialNumber].setLatLng([latitude, longitude]);
             transmitterMarkers[serialNumber].getPopup().setContent(`
-                <div class="transmitter-popup">
+                <div class="modern-popup">
                     <h4>${escapeHtml(deviceName)}</h4>
-                    <p><strong>Serial:</strong> ${serialNumber}</p>
-                    <p><strong>Assignment:</strong> ${assignmentId}</p>
-                    <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
-                    <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi || 'N/A'} dBm)</span></p>
-                    <p><strong>Counter:</strong> #${counter || 0}</p>
-                    <p><strong>Status:</strong> <span style="color: #00BCD4;">Online</span></p>
-                    <p><small>Last update: ${new Date().toLocaleTimeString()}</small></p>
+                    <p><strong>Serial:</strong> <span class="value">${serialNumber}</span></p>
+                    <p><strong>Assignment:</strong> <span class="value">${assignmentId}</span></p>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Battery</div>
+                            <div class="metric-value" style="color: ${battery_percent > 20 ? '#059669' : '#b91c1c'}">${battery_percent || 'N/A'}%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Signal</div>
+                            <div class="metric-value" style="color: ${signalGrade.color}">${rssi || 'N/A'} dBm</div>
+                        </div>
+                    </div>
+                    <p><strong>Signal Grade:</strong> <span class="value" style="color: ${signalGrade.color}">${signalGrade.grade}</span></p>
+                    <p><strong>Counter:</strong> <span class="value">#${counter || 0}</span></p>
+                    <p><strong>Status:</strong> <span class="badge online">Online</span></p>
+                    <div class="timestamp">Last update: ${new Date().toLocaleTimeString()}</div>
                 </div>
             `);
         } else {
-            // Create new marker
+            // Create new marker - KEEPING ORIGINAL MARKER STYLE
             const icon = L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div style="background-color: #22d3ee; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
@@ -1419,15 +2146,24 @@
 
             const marker = L.marker([latitude, longitude], { icon })
                 .bindPopup(`
-                    <div class="transmitter-popup">
+                    <div class="modern-popup">
                         <h4>${escapeHtml(deviceName)}</h4>
-                        <p><strong>Serial:</strong> ${serialNumber}</p>
-                        <p><strong>Assignment:</strong> ${assignmentId}</p>
-                        <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
-                        <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi || 'N/A'} dBm)</span></p>
-                        <p><strong>Counter:</strong> #${counter || 0}</p>
-                        <p><strong>Status:</strong> <span style="color: #00BCD4;">Online</span></p>
-                        <p><small>Last update: ${new Date().toLocaleTimeString()}</small></p>
+                        <p><strong>Serial:</strong> <span class="value">${serialNumber}</span></p>
+                        <p><strong>Assignment:</strong> <span class="value">${assignmentId}</span></p>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-label">Battery</div>
+                                <div class="metric-value" style="color: ${battery_percent > 20 ? '#059669' : '#b91c1c'}">${battery_percent || 'N/A'}%</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Signal</div>
+                                <div class="metric-value" style="color: ${signalGrade.color}">${rssi || 'N/A'} dBm</div>
+                            </div>
+                        </div>
+                        <p><strong>Signal Grade:</strong> <span class="value" style="color: ${signalGrade.color}">${signalGrade.grade}</span></p>
+                        <p><strong>Counter:</strong> <span class="value">#${counter || 0}</span></p>
+                        <p><strong>Status:</strong> <span class="badge online">Online</span></p>
+                        <div class="timestamp">Last update: ${new Date().toLocaleTimeString()}</div>
                     </div>
                 `);
 
@@ -1448,6 +2184,7 @@
         }
     }
 
+    // SOS marker function with modern popup styling
     function handleSOSAlert(alert, assignmentId) {
         const { transmitter_serial, acknowledged, resolved } = alert;
 
@@ -1471,10 +2208,17 @@
         const signalGrade = getRSSIGrade(rssi);
         const markerId = `sos_${transmitter_serial}`;
 
+        // Remove any existing marker for this serial
         if (activeSOSAlerts[markerId]) {
             map.removeLayer(activeSOSAlerts[markerId]);
         }
 
+        if (acknowledgedMarkers[`ack_${transmitter_serial}`]) {
+            map.removeLayer(acknowledgedMarkers[`ack_${transmitter_serial}`]);
+            delete acknowledgedMarkers[`ack_${transmitter_serial}`];
+        }
+
+        // KEEPING ORIGINAL SOS MARKER STYLE
         const icon = L.divIcon({
             className: 'custom-div-icon',
             html: `<div style="background-color: #F44336; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(244, 67, 54, 0.8); animation: pulse 1s infinite;"></div>`,
@@ -1488,18 +2232,55 @@
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(map)
             .bindPopup(`
-                <div class="sos-popup">
-                    <div class="sos-alert blink">SOS ALERT</div>
-                    <h4>${transmitter_serial}</h4>
-                    <p><strong>Customer ID:</strong> ${assignmentId}</p>
-                    <p><strong>Customer Name:</strong> ${assigned_name || 'Unknown'}</p>
-                    <p><strong>Alert Time:</strong> ${new Date(alert_time).toLocaleString()}</p>
-                    <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
-                    <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi} dBm)</span></p>
-                    <p><strong>SNR:</strong> ${snr || 'N/A'}</p>
-                    <button class="ack-btn" onclick="acknowledgeSOS(${JSON.stringify(alert).replace(/"/g, '&quot;')})">Acknowledge SOS</button>
+                <div class="modern-popup sos">
+
+                <div class="sos-header">
+                    <span class="badge sos">SOS ACTIVE</span>
+                    <span class="serial">${transmitter_serial}</span>
                 </div>
-            `);
+
+                    <p><strong>Customer ID:</strong>
+                        <span class="value">${assignmentId}</span>
+                    </p>
+
+                    <p><strong>Customer Name:</strong>
+                        <span class="value">${escapeHtml(assigned_name || 'Unknown')}</span>
+                    </p>
+
+                    <p><strong>Alert Time:</strong>
+                        <span class="value">${new Date(alert_time).toLocaleString()}</span>
+                    </p>
+
+                    <!-- METRICS -->
+                    <div class="metrics-grid">
+
+                        <div class="metric-item">
+                            <div class="metric-label">Battery</div>
+                            <div class="metric-value battery ${battery_percent > 20 ? 'good' : 'low'}">
+                                ${battery_percent || 'N/A'}%
+                            </div>
+                        </div>
+
+                        <div class="metric-item">
+                            <div class="metric-label">Signal</div>
+                            <div class="metric-value" style="color:${signalGrade.color}">
+                                ${rssi || 'N/A'} dBm
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <p><strong>SNR:</strong>
+                        <span class="value">${snr || 'N/A'}</span>
+                    </p>
+
+                    <button class="ack-btn"
+                        onclick="acknowledgeSOS(${JSON.stringify(alert).replace(/"/g, '&quot;')})">
+                        Acknowledge SOS
+                    </button>
+
+                </div>
+                `);
 
         activeSOSAlerts[markerId] = marker;
 
@@ -1508,12 +2289,18 @@
         marker.openPopup();
     }
 
+    // Acknowledged SOS marker function with modern popup styling
     function showAcknowledgedSOSMarker(serialNumber, alert, assignmentId) {
-        const markerId = `sos_${serialNumber}`;
+        const markerId = `ack_${serialNumber}`; // Different prefix for acknowledged markers
 
-        // Remove red SOS marker
-        if (activeSOSAlerts[markerId]) {
-            map.removeLayer(activeSOSAlerts[markerId]);
+        // Remove any existing marker for this serial
+        if (activeSOSAlerts[`sos_${serialNumber}`]) {
+            map.removeLayer(activeSOSAlerts[`sos_${serialNumber}`]);
+            delete activeSOSAlerts[`sos_${serialNumber}`];
+        }
+
+        if (acknowledgedMarkers[markerId]) {
+            map.removeLayer(acknowledgedMarkers[markerId]);
         }
 
         if (!alert || !alert.latitude || !alert.longitude) {
@@ -1531,6 +2318,7 @@
 
         const signalGrade = getRSSIGrade(rssi);
 
+        // KEEPING ORIGINAL ACKNOWLEDGED MARKER STYLE
         const icon = L.divIcon({
             className: 'custom-div-icon',
             html: `<div style="background-color: #FF9800; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);"></div>`,
@@ -1542,22 +2330,63 @@
         const showResolveButton = currentStaff && currentStaff.id === acknowledged_by;
 
         const popupContent = `
-            <div class="acknowledged-popup">
-                <div class="sos-acknowledged">SOS ACKNOWLEDGED</div>
-                <h4>${serialNumber}</h4>
-                <p><strong>Customer ID:</strong> ${assignmentId}</p>
-                <p><strong>Customer Name:</strong> ${assigned_name || 'Unknown'}</p>
-                <p><strong>Alert Time:</strong> ${new Date(alert_time).toLocaleString()}</p>
-                <div class="ack-info">
-                    <p><strong>Acknowledged By:</strong> ${acknowledged_by_name || acknowledged_by || 'Staff'}</p>
-                    <p><strong>Acknowledged Time:</strong> ${new Date(acknowledged_time).toLocaleString()}</p>
+            <div class="modern-popup acknowledged">
+
+                <!-- FLEX HEADER -->
+                <div class="ack-header">
+                    <span class="badge acknowledged">SOS ACKNOWLEDGED</span>
+                    <span class="serial">${serialNumber}</span>
                 </div>
-                <p><strong>Battery:</strong> ${battery_percent || 'N/A'}%</p>
-                <p><strong>Signal:</strong> <span style="color: ${signalGrade.color}">${signalGrade.grade} (${rssi} dBm)</span></p>
-                <p><strong>SNR:</strong> ${snr || 'N/A'}</p>
-                ${showResolveButton ?
-                    `<button class="resolve-btn" onclick="resolveSOS('${serialNumber}', '${assignmentId}')">Resolve SOS</button>` :
-                    '<p class="resolve-note"><em>Only ${acknowledged_by_name || acknowledged_by} can resolve this SOS</em></p>'}
+
+                <p><strong>Customer ID:</strong>
+                    <span class="value">${assignmentId}</span>
+                </p>
+
+                <p><strong>Customer Name:</strong>
+                    <span class="value">${escapeHtml(assigned_name || 'Unknown')}</span>
+                </p>
+
+                <p><strong>Alert Time:</strong>
+                    <span class="value">${new Date(alert_time).toLocaleString()}</span>
+                </p>
+
+                <!-- ACK INFO -->
+                <div class="ack-info">
+                    <p><strong>Staff Name:</strong>
+                        ${escapeHtml(acknowledged_by_name || acknowledged_by || 'Staff')}
+                    </p>
+                    <p><strong>Time:</strong>
+                        ${new Date(acknowledged_time).toLocaleString()}
+                    </p>
+                </div>
+
+                <!-- METRICS -->
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">Battery</div>
+                        <div class="metric-value ${battery_percent > 20 ? 'good' : 'low'}">
+                            ${battery_percent || 'N/A'}%
+                        </div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="metric-label">Signal</div>
+                        <div class="metric-value" style="color:${signalGrade.color}">
+                            ${rssi || 'N/A'} dBm
+                        </div>
+                    </div>
+                </div>
+
+                <p><strong>SNR:</strong>
+                    <span class="value">${snr || 'N/A'}</span>
+                </p>
+
+                ${
+                    showResolveButton
+                    ? `<button class="resolve-btn" onclick="resolveSOS('${serialNumber}', '${assignmentId}')">Resolve SOS</button>`
+                    : `<p class="resolve-note"><em>Only the acknowledging responder can resolve this SOS</em></p>`
+                }
+
             </div>
         `;
 
@@ -1565,16 +2394,25 @@
             .addTo(map)
             .bindPopup(popupContent);
 
-        activeSOSAlerts[markerId] = marker;
+        acknowledgedMarkers[markerId] = marker;
     }
 
     function removeSOSMarker(serialNumber) {
-        const markerId = `sos_${serialNumber}`;
-        if (activeSOSAlerts[markerId]) {
-            map.removeLayer(activeSOSAlerts[markerId]);
-            delete activeSOSAlerts[markerId];
-            console.log(`🗑️ Removed SOS marker for ${serialNumber}`);
+        // Remove from active SOS markers
+        const sosMarkerId = `sos_${serialNumber}`;
+        if (activeSOSAlerts[sosMarkerId]) {
+            map.removeLayer(activeSOSAlerts[sosMarkerId]);
+            delete activeSOSAlerts[sosMarkerId];
         }
+
+        // Remove from acknowledged markers
+        const ackMarkerId = `ack_${serialNumber}`;
+        if (acknowledgedMarkers[ackMarkerId]) {
+            map.removeLayer(acknowledgedMarkers[ackMarkerId]);
+            delete acknowledgedMarkers[ackMarkerId];
+        }
+
+        console.log(`🗑️ Removed all markers for ${serialNumber}`);
     }
 
     function playAlertSound() {
@@ -1600,26 +2438,34 @@
     }
 
     function updateCounts() {
-        // Update online devices count
-        document.getElementById('onlineCount').textContent = onlineDevices;
+        // Update online devices count in legend
+        const liveCountEl = document.getElementById('liveTransmittersCount');
+        if (liveCountEl) liveCountEl.textContent = onlineDevices;
 
         // Update active SOS count
         sosAlerts = activeSOSSerials.size;
-        document.getElementById('sosCount').textContent = sosAlerts;
+        const sosCountEl = document.getElementById('sosAlertsCount');
+        if (sosCountEl) sosCountEl.textContent = sosAlerts;
 
         // Update acknowledged SOS count (only those that are acknowledged but not resolved)
         acknowledgedSOSCount = acknowledgedSOSSerials.size;
-        document.getElementById('acknowledgedCount').textContent = acknowledgedSOSCount;
+        const ackCountEl = document.getElementById('acknowledgedCount');
+        if (ackCountEl) ackCountEl.textContent = acknowledgedSOSCount;
+
+        // Update last updated time
+        updateLastUpdatedTime();
 
         console.log(`📊 Stats: Online=${onlineDevices}, Active SOS=${sosAlerts}, Acknowledged=${acknowledgedSOSCount}, Resolved=${resolvedSOSSerials.size}`);
     }
 
     function updateFirebaseStatus(connected) {
         const statusText = document.getElementById('firebaseStatusText');
-        if (connected) {
-            statusText.innerHTML = '<span class="firebase-connected">● Firebase Connected</span>';
-        } else {
-            statusText.innerHTML = '<span class="firebase-disconnected">● Firebase Disconnected</span>';
+        if (statusText) {
+            if (connected) {
+                statusText.innerHTML = '<span class="firebase-connected">● Firebase Connected</span>';
+            } else {
+                statusText.innerHTML = '<span class="firebase-disconnected">● Firebase Disconnected</span>';
+            }
         }
     }
 

@@ -41,7 +41,15 @@ public class MapFragment extends Fragment {
     private SharedPrefManager sharedPrefManager;
     private boolean isFragmentActive = false;
 
-    // JavaScript Interface Class for bidirectional communication
+    // ── NEW: store pending alert args so we can call zoomToAlert
+    //         after the page + Firebase have both finished loading
+    private String pendingAlertLat    = null;
+    private String pendingAlertLng    = null;
+    private String pendingAlertSerial = null;
+    private String pendingAlertType   = null;
+    private String pendingAlertName   = null;
+
+    // JavaScript Interface Class
     public class JavaScriptInterface {
         private Context context;
 
@@ -69,13 +77,9 @@ public class MapFragment extends Fragment {
             if (!isFragmentValid()) return "STAFF";
             sharedPrefManager = SharedPrefManager.getInstance(context);
             String userType = sharedPrefManager.getUserType();
-            if ("admin".equals(userType)) {
-                return "Administrator";
-            } else if ("staff".equals(userType)) {
-                return "STAFF";
-            } else {
-                return "User";
-            }
+            if ("admin".equals(userType))       return "Administrator";
+            else if ("staff".equals(userType))  return "STAFF";
+            else                                return "User";
         }
 
         @JavascriptInterface
@@ -84,17 +88,16 @@ public class MapFragment extends Fragment {
                 if (!isFragmentValid()) {
                     return "{\"id\":\"STAFF001\",\"name\":\"Staff Member\",\"role\":\"STAFF\",\"isLoggedIn\":false}";
                 }
-
                 sharedPrefManager = SharedPrefManager.getInstance(context);
                 JSONObject staffData = new JSONObject();
-                staffData.put("id", String.valueOf(sharedPrefManager.getStaffId()));
-                staffData.put("name", sharedPrefManager.getStaffName());
-                staffData.put("role", getStaffRole());
-                staffData.put("email", sharedPrefManager.getEmail());
-                staffData.put("contact", sharedPrefManager.getContact());
-                staffData.put("username", sharedPrefManager.getUsername());
-                staffData.put("isLoggedIn", sharedPrefManager.isLoggedIn());
-                staffData.put("userType", sharedPrefManager.getUserType());
+                staffData.put("id",        String.valueOf(sharedPrefManager.getStaffId()));
+                staffData.put("name",      sharedPrefManager.getStaffName());
+                staffData.put("role",      getStaffRole());
+                staffData.put("email",     sharedPrefManager.getEmail());
+                staffData.put("contact",   sharedPrefManager.getContact());
+                staffData.put("username",  sharedPrefManager.getUsername());
+                staffData.put("isLoggedIn",sharedPrefManager.isLoggedIn());
+                staffData.put("userType",  sharedPrefManager.getUserType());
                 return staffData.toString();
             } catch (JSONException e) {
                 return "{\"id\":\"STAFF001\",\"name\":\"Staff Member\",\"role\":\"STAFF\",\"isLoggedIn\":false}";
@@ -111,21 +114,25 @@ public class MapFragment extends Fragment {
         @JavascriptInterface
         public void onMapReady() {
             if (isFragmentValid() && getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(context, "Map ready with staff data", Toast.LENGTH_SHORT).show();
-                });
+                getActivity().runOnUiThread(() ->
+                    Toast.makeText(context, "Map ready with staff data", Toast.LENGTH_SHORT).show()
+                );
             }
         }
 
         @JavascriptInterface
         public void showToast(String message) {
             if (isFragmentValid() && getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                });
+                getActivity().runOnUiThread(() ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                );
             }
         }
     }
+
+    // ─────────────────────────────────────────────────────────
+    //  Lifecycle
+    // ─────────────────────────────────────────────────────────
 
     @Nullable
     @Override
@@ -140,8 +147,11 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-        requestQueue = Volley.newRequestQueue(requireContext());
-        sharedPrefManager = SharedPrefManager.getInstance(requireContext());
+        requestQueue        = Volley.newRequestQueue(requireContext());
+        sharedPrefManager   = SharedPrefManager.getInstance(requireContext());
+
+        // ── Stash any alert args that arrived via the Bundle
+        readAlertArguments();
 
         leafletWebView = view.findViewById(R.id.leafletWebView);
 
@@ -155,12 +165,10 @@ public class MapFragment extends Fragment {
         webSettings.setAllowUniversalAccessFromFileURLs(true);
         webSettings.setAllowFileAccessFromFileURLs(true);
 
-        // Enable mixed content for Firebase
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
         }
 
-        // Add JavaScript Interface
         leafletWebView.addJavascriptInterface(
             new JavaScriptInterface(requireContext()),
             "AndroidApp"
@@ -170,45 +178,111 @@ public class MapFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                if (!isFragmentValid()) return;
 
-                // Check if fragment is still attached
-                if (!isFragmentValid()) {
-                    return;
-                }
-
-                // Inject staff data immediately after page loads
                 injectStaffData();
-
                 showToast("Emergency Response Map Loaded", Toast.LENGTH_SHORT);
 
-                // Wait for map initialization
+                // Wait for Leaflet + Firebase to finish initialising
                 leafletWebView.postDelayed(() -> {
-                    // Double-check fragment is still attached before proceeding
-                    if (!isFragmentValid()) {
-                        return;
-                    }
+                    if (!isFragmentValid()) return;
 
-                    // Get user location
                     checkLocationPermissionAndGetLocation();
-
-                    // Load base stations
                     loadBaseStations();
-
-                    // Check Firebase connection
                     checkFirebaseConnection();
-                }, 1000);
+
+                    // ── After everything is ready, zoom to the alert if one arrived
+                    handleAlertArguments();
+
+                }, 1500);   // slightly longer than before so Firebase markers render first
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // Handle all URLs within WebView
                 return false;
             }
         });
 
-        // Load the map HTML file from assets
         leafletWebView.loadUrl("file:///android_asset/map.html");
     }
+
+    // ─────────────────────────────────────────────────────────
+    //  Alert argument helpers  (NEW)
+    // ─────────────────────────────────────────────────────────
+
+    /**
+     * Pull alert data out of the Bundle (set by MainActivity) and keep
+     * it in instance fields so we can call zoomToAlert after the map loads.
+     */
+    private void readAlertArguments() {
+        Bundle args = getArguments();
+        if (args == null) return;
+
+        pendingAlertType   = args.getString("alertType");
+        pendingAlertLat    = args.getString("latitude");
+        pendingAlertLng    = args.getString("longitude");
+        pendingAlertSerial = args.getString("transmitter_serial");
+        pendingAlertName   = args.getString("assigned_name");
+
+        android.util.Log.d("MapFragment",
+            "Alert args received: type=" + pendingAlertType
+                + " serial=" + pendingAlertSerial
+                + " lat=" + pendingAlertLat
+                + " lng=" + pendingAlertLng);
+    }
+
+    /**
+     * Called after the page has loaded. Injects a JS retry loop that keeps
+     * trying to call MapFunctions.zoomToAlert() until the SOS/geofence
+     * marker has been rendered by the Firebase listener.
+     */
+    private void handleAlertArguments() {
+        if (pendingAlertType == null || pendingAlertLat == null || pendingAlertLng == null) {
+            return;  // no alert to zoom to
+        }
+        if (!isFragmentValid() || leafletWebView == null) return;
+
+        android.util.Log.d("MapFragment", "Calling zoomToAlert for " + pendingAlertSerial);
+
+        // Build the JS — the retry loop handles the race between Android calling
+        // this method and Firebase finishing its first data snapshot on the JS side.
+        String javascript = String.format(
+            "javascript:(function() {" +
+                "  var lat    = %s;" +
+                "  var lng    = %s;" +
+                "  var serial = '%s';" +
+                "  var type   = '%s';" +
+                "  var name   = '%s';" +
+                "  var attempts = 15;" +                          // max 15 × 800 ms = 12 s
+                "  function tryZoom() {" +
+                "    if (window.MapFunctions && window.MapFunctions.zoomToAlert) {" +
+                "      window.MapFunctions.zoomToAlert(lat, lng, serial, type, name);" +
+                "    } else if (attempts-- > 0) {" +
+                "      setTimeout(tryZoom, 800);" +
+                "    }" +
+                "  }" +
+                "  tryZoom();" +
+                "})();",
+            pendingAlertLat,
+            pendingAlertLng,
+            escapeJavaScriptString(pendingAlertSerial != null ? pendingAlertSerial : ""),
+            escapeJavaScriptString(pendingAlertType),
+            escapeJavaScriptString(pendingAlertName != null ? pendingAlertName : "")
+        );
+
+        leafletWebView.evaluateJavascript(javascript, null);
+
+        // Clear so onResume doesn't re-zoom
+        pendingAlertType   = null;
+        pendingAlertLat    = null;
+        pendingAlertLng    = null;
+        pendingAlertSerial = null;
+        pendingAlertName   = null;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  Fragment validity guard
+    // ─────────────────────────────────────────────────────────
 
     private boolean isFragmentValid() {
         return isFragmentActive &&
@@ -220,48 +294,36 @@ public class MapFragment extends Fragment {
             !getActivity().isDestroyed();
     }
 
-    private void injectStaffData() {
-        if (!isFragmentValid()) {
-            return;
-        }
+    // ─────────────────────────────────────────────────────────
+    //  Staff data injection
+    // ─────────────────────────────────────────────────────────
 
+    private void injectStaffData() {
+        if (!isFragmentValid()) return;
         if (!sharedPrefManager.isLoggedIn()) {
             showToast("Please log in to access full features", Toast.LENGTH_SHORT);
             return;
         }
 
-        String staffId = String.valueOf(sharedPrefManager.getStaffId());
+        String staffId   = String.valueOf(sharedPrefManager.getStaffId());
         String staffName = sharedPrefManager.getStaffName();
-        if (staffName == null || staffName.isEmpty()) {
-            staffName = sharedPrefManager.getUsername();
-        }
+        if (staffName == null || staffName.isEmpty()) staffName = sharedPrefManager.getUsername();
         String staffRole = getStaffRole();
-        String email = sharedPrefManager.getEmail();
-        String contact = sharedPrefManager.getContact();
+        String email     = sharedPrefManager.getEmail();
+        String contact   = sharedPrefManager.getContact();
 
-        // Create JavaScript to inject staff data into localStorage
         String javascript = String.format(
             "javascript:(function() {" +
                 "try {" +
-                "   localStorage.setItem('staff_id', '%s');" +
-                "   localStorage.setItem('staff_name', '%s');" +
-                "   localStorage.setItem('staff_role', '%s');" +
-                "   localStorage.setItem('staff_email', '%s');" +
+                "   localStorage.setItem('staff_id',      '%s');" +
+                "   localStorage.setItem('staff_name',    '%s');" +
+                "   localStorage.setItem('staff_role',    '%s');" +
+                "   localStorage.setItem('staff_email',   '%s');" +
                 "   localStorage.setItem('staff_contact', '%s');" +
                 "   console.log('[Android] Staff data injected:', '%s', '%s', '%s');" +
-                "   " +
-                "   // Notify map that staff data is ready" +
-                "   if (typeof window.initStaffInfo === 'function') {" +
-                "       window.initStaffInfo();" +
-                "   }" +
-                "   " +
-                "   // Update UI with staff info" +
-                "   if (typeof window.updateStaffUI === 'function') {" +
-                "       window.updateStaffUI();" +
-                "   }" +
-                "} catch(e) {" +
-                "   console.error('[Android] Error injecting staff data:', e);" +
-                "}" +
+                "   if (typeof window.initStaffInfo  === 'function') window.initStaffInfo();" +
+                "   if (typeof window.updateStaffUI  === 'function') window.updateStaffUI();" +
+                "} catch(e) { console.error('[Android] Error injecting staff data:', e); }" +
                 "})();",
             escapeJavaScriptString(staffId),
             escapeJavaScriptString(staffName),
@@ -272,28 +334,24 @@ public class MapFragment extends Fragment {
         );
 
         if (leafletWebView != null) {
-            leafletWebView.evaluateJavascript(javascript, value -> {
-                // JavaScript execution callback
-            });
+            leafletWebView.evaluateJavascript(javascript, value -> { /* callback */ });
         }
     }
 
     private String getStaffRole() {
         if (!isFragmentValid()) return "STAFF";
-
         String userType = sharedPrefManager.getUserType();
-        if ("admin".equals(userType)) {
-            return "Administrator";
-        } else if ("staff".equals(userType)) {
-            return "STAFF";
-        } else {
-            return "User";
-        }
+        if ("admin".equals(userType))      return "Administrator";
+        else if ("staff".equals(userType)) return "STAFF";
+        else                               return "User";
     }
+
+    // ─────────────────────────────────────────────────────────
+    //  Location
+    // ─────────────────────────────────────────────────────────
 
     private void checkLocationPermissionAndGetLocation() {
         if (!isFragmentValid()) return;
-
         if (ContextCompat.checkSelfPermission(getContext(),
             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             getUserLocation();
@@ -309,7 +367,6 @@ public class MapFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && isFragmentValid()) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getUserLocation();
@@ -322,7 +379,6 @@ public class MapFragment extends Fragment {
 
     private void getUserLocation() {
         if (!isFragmentValid()) return;
-
         if (ActivityCompat.checkSelfPermission(getContext(),
             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             updateMapLocation(14.5995, 120.9842);
@@ -333,9 +389,7 @@ public class MapFragment extends Fragment {
         locationTask.addOnSuccessListener(getActivity(), location -> {
             if (isFragmentValid()) {
                 if (location != null) {
-                    double latitude = location.getLatitude();
-                    double longitude = location.getLongitude();
-                    updateMapLocation(latitude, longitude);
+                    updateMapLocation(location.getLatitude(), location.getLongitude());
                 } else {
                     updateMapLocation(14.5995, 120.9842);
                 }
@@ -351,94 +405,79 @@ public class MapFragment extends Fragment {
 
     private void updateMapLocation(double latitude, double longitude) {
         if (!isFragmentValid() || leafletWebView == null) return;
-
         String javascript = String.format(
             "javascript:(function() {" +
                 "if (typeof window.MapFunctions !== 'undefined' && " +
                 "    typeof window.MapFunctions.updateUserLocation === 'function') {" +
                 "   window.MapFunctions.updateUserLocation(%f, %f);" +
-                "   console.log('[Android] Location updated:', %f, %f);" +
-                "} else {" +
-                "   console.error('[Android] MapFunctions.updateUserLocation not available');" +
-                "}" +
+                "} else { console.error('[Android] MapFunctions.updateUserLocation not available'); }" +
                 "})();",
-            latitude, longitude, latitude, longitude
+            latitude, longitude
         );
-
         leafletWebView.evaluateJavascript(javascript, null);
     }
 
+    // ─────────────────────────────────────────────────────────
+    //  Base stations
+    // ─────────────────────────────────────────────────────────
+
     private void loadBaseStations() {
         if (!isFragmentValid()) return;
-
         sharedPrefManager = SharedPrefManager.getInstance(getContext());
-        int userId = sharedPrefManager.getUserId();
+        int userId  = sharedPrefManager.getUserId();
         int staffId = sharedPrefManager.getStaffId();
 
-        // Build URL with user_id and staff_id
         String url = ApiConfig.BASE_URL + "get_base_stations.php?user_id=" + userId;
-        if (staffId > 0) {
-            url += "&staff_id=" + staffId;
-        }
+        if (staffId > 0) url += "&staff_id=" + staffId;
 
-        android.util.Log.d("MapFragment", "Loading base stations for user_id=" + userId + ", staff_id=" + staffId);
         android.util.Log.d("MapFragment", "Base stations URL: " + url);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-            Request.Method.GET,
-            url,
-            null,
+            Request.Method.GET, url, null,
             response -> {
                 if (!isFragmentValid()) return;
-
                 try {
-                    boolean success = response.getBoolean("success");
-                    if (success) {
+                    if (response.getBoolean("success")) {
                         sendBaseStationsToMap(response.toString());
-
-                        // Log debug info
-                        if (response.has("debug")) {
-                            android.util.Log.d("MapFragment", "Base stations debug: " + response.getJSONObject("debug").toString());
-                        }
-
-                        showToast("Base stations loaded successfully", Toast.LENGTH_SHORT);
+                        showToast("Base stations & geofences loaded", Toast.LENGTH_SHORT);
                     } else {
-                        String message = response.optString("message", "Unknown error");
-                        showToast("Failed to load base stations: " + message, Toast.LENGTH_SHORT);
+                        showToast("Failed to load base stations: " + response.optString("message"), Toast.LENGTH_SHORT);
                     }
                 } catch (JSONException e) {
-                    showToast("Error parsing base stations response", Toast.LENGTH_SHORT);
                     android.util.Log.e("MapFragment", "Error parsing base stations", e);
                 }
             },
             error -> {
                 if (!isFragmentValid()) return;
-
                 showToast("Network error loading base stations", Toast.LENGTH_SHORT);
                 android.util.Log.e("MapFragment", "Network error loading base stations", error);
-                error.printStackTrace();
             }
         );
-
         requestQueue.add(jsonObjectRequest);
     }
 
     private void sendBaseStationsToMap(String jsonData) {
         if (!isFragmentValid() || leafletWebView == null) return;
-
         try {
             JSONObject response = new JSONObject(jsonData);
             if (response.getBoolean("success")) {
                 JSONArray baseStationsArray = response.getJSONArray("data");
-
                 StringBuilder jsArray = new StringBuilder("[");
                 for (int i = 0; i < baseStationsArray.length(); i++) {
                     if (i > 0) jsArray.append(",");
-
                     JSONObject station = baseStationsArray.getJSONObject(i);
                     jsArray.append("{")
+                        .append("\"id\":").append(station.optInt("id", 0)).append(",")
+                        .append("\"serial_number\":\"").append(escapeJsonString(station.optString("serial_number", ""))).append("\",")
+                        .append("\"station_name\":\"").append(escapeJsonString(station.optString("station_name", "Base Station"))).append("\",")
                         .append("\"latitude\":").append(station.optDouble("latitude", 0)).append(",")
                         .append("\"longitude\":").append(station.optDouble("longitude", 0)).append(",")
+                        .append("\"status\":\"").append(escapeJsonString(station.optString("status", "offline"))).append("\",")
+                        .append("\"address\":\"").append(escapeJsonString(station.optString("address", ""))).append("\",")
+                        .append("\"altitude\":").append(station.optDouble("altitude", 0)).append(",")
+                        .append("\"online_devices\":").append(station.optInt("online_devices", 0)).append(",")
+                        .append("\"total_devices\":").append(station.optInt("total_devices", 0)).append(",")
+                        .append("\"geofence_radius_m\":").append(station.optInt("geofence_radius_m", 500))
                         .append("}");
                 }
                 jsArray.append("]");
@@ -448,55 +487,59 @@ public class MapFragment extends Fragment {
                         "if (typeof window.MapFunctions !== 'undefined' && " +
                         "    typeof window.MapFunctions.addBaseStationMarkers === 'function') {" +
                         "   window.MapFunctions.addBaseStationMarkers(%s);" +
-                        "   console.log('[Android] Base stations sent to map');" +
-                        "} else {" +
-                        "   console.error('[Android] MapFunctions.addBaseStationMarkers not available');" +
-                        "}" +
+                        "} else { console.error('[Android] MapFunctions.addBaseStationMarkers not available'); }" +
                         "})();",
                     jsArray.toString()
                 );
-
                 leafletWebView.evaluateJavascript(javascript, null);
             }
         } catch (JSONException e) {
-            showToast("Error processing base stations data", Toast.LENGTH_SHORT);
-            e.printStackTrace();
+            android.util.Log.e("MapFragment", "Error processing base stations", e);
         }
     }
 
-    private String escapeJavaScriptString(String input) {
-        if (input == null) return "";
-        return input
-            .replace("\\", "\\\\")
-            .replace("'", "\\'")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r");
-    }
+    // ─────────────────────────────────────────────────────────
+    //  Firebase status check
+    // ─────────────────────────────────────────────────────────
 
     private void checkFirebaseConnection() {
         if (!isFragmentValid() || leafletWebView == null) return;
-
         leafletWebView.postDelayed(() -> {
             if (!isFragmentValid()) return;
-
             String javascript = "javascript:(function() {" +
-                "if (typeof window.checkFirebaseStatus === 'function') {" +
-                "   window.checkFirebaseStatus();" +
-                "}" +
+                "if (typeof window.checkFirebaseStatus === 'function') window.checkFirebaseStatus();" +
                 "})();";
-
             leafletWebView.evaluateJavascript(javascript, null);
         }, 2000);
     }
 
+    // ─────────────────────────────────────────────────────────
+    //  Utility
+    // ─────────────────────────────────────────────────────────
+
+    private String escapeJsonString(String input) {
+        if (input == null) return "";
+        return input.replace("\\", "\\\\").replace("\"", "\\\"")
+            .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+    }
+
+    private String escapeJavaScriptString(String input) {
+        if (input == null) return "";
+        return input.replace("\\", "\\\\").replace("'", "\\'")
+            .replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    }
+
     private void showToast(String message, int duration) {
         if (isFragmentValid() && getActivity() != null) {
-            getActivity().runOnUiThread(() -> {
-                Toast.makeText(getContext(), message, duration).show();
-            });
+            getActivity().runOnUiThread(() ->
+                Toast.makeText(getContext(), message, duration).show()
+            );
         }
     }
+
+    // ─────────────────────────────────────────────────────────
+    //  Fragment lifecycle
+    // ─────────────────────────────────────────────────────────
 
     @Override
     public void onResume() {
@@ -505,14 +548,8 @@ public class MapFragment extends Fragment {
         if (leafletWebView != null && isFragmentValid()) {
             leafletWebView.postDelayed(() -> {
                 if (!isFragmentValid()) return;
-
-                // Refresh staff data
                 injectStaffData();
-
-                // Refresh base stations
                 loadBaseStations();
-
-                // Check Firebase connection
                 checkFirebaseConnection();
             }, 500);
         }
@@ -525,24 +562,10 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        isFragmentActive = false;
-
-        // Clear WebView callbacks and references
-        if (leafletWebView != null) {
-            leafletWebView.setWebViewClient(null);
-            leafletWebView.destroy();
-            leafletWebView = null;
-        }
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        isFragmentActive = false;
-        if (requestQueue != null) {
-            requestQueue.cancelAll(this);
+        if (leafletWebView != null) {
+            leafletWebView.destroy();
         }
     }
 }

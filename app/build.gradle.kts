@@ -2,12 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")  // Add this line
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
     namespace = "com.example.link"
-    compileSdk = 36  // Fix: Remove the version = release() part
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.link"
@@ -53,27 +53,26 @@ dependencies {
     implementation(libs.material)
     implementation(libs.volley)
     implementation(libs.play.services.location)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.database)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation("com.mikepenz:iconics-core:5.3.0")
     implementation("com.mikepenz:fontawesome-typeface:5.9.0.0-kotlin")
-
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.google.zxing:core:3.5.3")
-
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-
-    // Firebase dependencies - Update these
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-database")
-    implementation("com.google.firebase:firebase-messaging")
-    implementation("com.google.firebase:firebase-analytics")  // Optional but recommended
+    implementation("com.google.firebase:firebase-messaging-ktx:23.4.1")
+    implementation("com.google.firebase:firebase-database-ktx:20.3.0")
+    implementation("com.google.firebase:firebase-analytics-ktx:21.5.0")
 }

@@ -1,24 +1,27 @@
 package com.example.link;
 
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.ContextCompat;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.android.volley.DefaultRetryPolicy;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,12 +49,11 @@ public class CustomerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer);
 
-        requestQueue = Volley.newRequestQueue(this);
+        requestQueue   = Volley.newRequestQueue(this);
         sharedPrefManager = SharedPrefManager.getInstance(this);
-
         currentStaffId = sharedPrefManager.getStaffId();
 
-        Log.d("CustomerActivity", "Staff ID: " + currentStaffId);
+        Log.d("CustomerActivity", "Staff ID: "   + currentStaffId);
         Log.d("CustomerActivity", "User Type: " + sharedPrefManager.getUserType());
 
         if (!"staff".equals(sharedPrefManager.getUserType())
@@ -83,11 +85,11 @@ public class CustomerActivity extends AppCompatActivity {
        ===================================================== */
 
     private void initViews() {
-        btnBack = findViewById(R.id.btnBack);
-        tvAvailableCount = findViewById(R.id.tvAvailableCount);
-        tvActiveCount = findViewById(R.id.tvActiveCount);
+        btnBack                  = findViewById(R.id.btnBack);
+        tvAvailableCount         = findViewById(R.id.tvAvailableCount);
+        tvActiveCount            = findViewById(R.id.tvActiveCount);
         availableDevicesContainer = findViewById(R.id.availableDevicesContainer);
-        activeDevicesContainer = findViewById(R.id.activeDevicesContainer);
+        activeDevicesContainer   = findViewById(R.id.activeDevicesContainer);
     }
 
     private void setupListeners() {
@@ -103,9 +105,7 @@ public class CustomerActivity extends AppCompatActivity {
         Log.d("DeviceRequest", url);
 
         JsonObjectRequest request = new JsonObjectRequest(
-            Request.Method.GET,
-            url,
-            null,
+            Request.Method.GET, url, null,
             response -> {
                 try {
                     if (!response.getBoolean("success")) {
@@ -113,11 +113,8 @@ public class CustomerActivity extends AppCompatActivity {
                         return;
                     }
 
-                    int availableCount = response.optInt("available_count");
-                    int activeCount = response.optInt("active_count");
-
-                    tvAvailableCount.setText(String.valueOf(availableCount));
-                    tvActiveCount.setText(String.valueOf(activeCount));
+                    tvAvailableCount.setText(String.valueOf(response.optInt("available_count")));
+                    tvActiveCount.setText(String.valueOf(response.optInt("active_count")));
 
                     loadAvailableDevices(response.optJSONArray("available_devices"));
                     loadActiveDevices(response.optJSONArray("active_devices"));
@@ -137,7 +134,7 @@ public class CustomerActivity extends AppCompatActivity {
     }
 
     /* =====================================================
-       AVAILABLE DEVICES
+       AVAILABLE DEVICES  ← THE UPDATED METHOD
        ===================================================== */
 
     private void loadAvailableDevices(JSONArray devices) {
@@ -150,27 +147,57 @@ public class CustomerActivity extends AppCompatActivity {
 
         for (int i = 0; i < devices.length(); i++) {
             JSONObject device = devices.optJSONObject(i);
-            String serial = device.optString("serial_number");
-            String status = device.optString("device_status");
+            if (device == null) continue;
+
+            String serial     = device.optString("serial_number", "—");
+            String deviceName = device.optString("device_name",   serial);   // ← was device_status
+            int    battery    = device.optInt   ("battery_percent", 0);       // ← new
 
             View item = LayoutInflater.from(this)
                 .inflate(R.layout.item_available_device, null);
 
+            // Serial number  (bold top line)
             TextView tvSerial = item.findViewById(R.id.tvDeviceSerial);
-            TextView tvStatus = item.findViewById(R.id.tvDeviceStatus);
-            AppCompatButton btnAssign = item.findViewById(R.id.btnAssign);
-
             tvSerial.setText(serial);
-            tvStatus.setText(status);
+
+            // Device name  (subtitle line — was showing status before)
+            TextView tvDeviceName = item.findViewById(R.id.tvDeviceName);
+            if (tvDeviceName != null) {
+                tvDeviceName.setText(deviceName);
+            }
+
+            // Battery percentage
+            TextView tvBattery = item.findViewById(R.id.tvBatteryPercent);
+            if (tvBattery != null) {
+                tvBattery.setText(battery + "%");
+
+                // Tint the battery label red when low, green otherwise
+                int color = battery <= 20
+                    ? Color.parseColor("#EF4444")   // red-500
+                    : Color.parseColor("#64748B");  // slate-500 (default)
+                tvBattery.setTextColor(color);
+            }
+
+            // Battery icon tint (matches the label colour)
+            ImageView batteryIcon = item.findViewById(R.id.batteryIcon);
+            if (batteryIcon != null) {
+                int iconTint = battery <= 20
+                    ? Color.parseColor("#EF4444")
+                    : Color.parseColor("#64748B");
+                batteryIcon.setColorFilter(iconTint);
+            }
+
+            // Assign button
+            AppCompatButton btnAssign = item.findViewById(R.id.btnAssign);
             btnAssign.setOnClickListener(v -> showUserInputModal(serial));
 
             availableDevicesContainer.addView(item);
         }
     }
 
-   /* =====================================================
-   ACTIVE DEVICES - UPDATED WITH END BUTTON
-   ===================================================== */
+    /* =====================================================
+       ACTIVE DEVICES
+       ===================================================== */
 
     private void loadActiveDevices(JSONArray devices) {
         activeDevicesContainer.removeAllViews();
@@ -182,47 +209,36 @@ public class CustomerActivity extends AppCompatActivity {
 
         for (int i = 0; i < devices.length(); i++) {
             JSONObject device = devices.optJSONObject(i);
+            if (device == null) continue;
 
             View card = LayoutInflater.from(this)
                 .inflate(R.layout.item_active_device, null);
 
-            // Set device information
             ((TextView) card.findViewById(R.id.tvUserName))
                 .setText(device.optString("assigned_name"));
-
             ((TextView) card.findViewById(R.id.tvDeviceSerial))
                 .setText(device.optString("serial_number"));
-
             ((TextView) card.findViewById(R.id.tvContact))
                 .setText(device.optString("assigned_contact"));
-
             ((TextView) card.findViewById(R.id.tvAssignedBy))
                 .setText(device.optString("assigned_by"));
 
-            // Update status
-            String status = device.optString("device_status");
-            TextView tvStatus = card.findViewById(R.id.tvStatus);
-            LinearLayout statusBadge = card.findViewById(R.id.statusBadge);
-
+            String   status      = device.optString("device_status");
+            TextView tvStatus    = card.findViewById(R.id.tvStatus);
             if ("registered".equals(status)) {
                 tvStatus.setText("Active");
                 tvStatus.setTextColor(getResources().getColor(R.color.green_600));
-                // Update background if needed for offline status
-                // statusBadge.setBackgroundResource(R.drawable.offline_badge_elevated);
             } else {
                 tvStatus.setText("Offline");
                 tvStatus.setTextColor(getResources().getColor(R.color.gray_500));
-                // Update the check_mark icon if needed
             }
 
-            // Get assignment ID and serial number for the End button
-            int assignmentId = device.optInt("assignment_id");
+            int    assignmentId = device.optInt("assignment_id");
             String serialNumber = device.optString("serial_number");
 
-            // Set up End button
-            AppCompatButton btnEndAssignment = card.findViewById(R.id.btnEndAssignment);
-            if (btnEndAssignment != null) {
-                btnEndAssignment.setOnClickListener(v ->
+            AppCompatButton btnEnd = card.findViewById(R.id.btnEndAssignment);
+            if (btnEnd != null) {
+                btnEnd.setOnClickListener(v ->
                     showEndAssignmentConfirmation(assignmentId, serialNumber));
             }
 
@@ -231,110 +247,82 @@ public class CustomerActivity extends AppCompatActivity {
     }
 
     /* =====================================================
-       END ASSIGNMENT CONFIRMATION DIALOG
+       END ASSIGNMENT
        ===================================================== */
 
     private void showEndAssignmentConfirmation(int assignmentId, String serialNumber) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("End Assignment");
-        builder.setMessage("Are you sure you want to end the assignment for device: " + serialNumber + "?");
-
-        builder.setPositiveButton("Yes, End", (dialog, which) -> {
-            endAssignment(assignmentId, serialNumber);
-            dialog.dismiss();
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        new AlertDialog.Builder(this)
+            .setTitle("End Assignment")
+            .setMessage("Are you sure you want to end the assignment for device: " + serialNumber + "?")
+            .setPositiveButton("Yes, End", (dialog, which) -> {
+                endAssignment(assignmentId, serialNumber);
+                dialog.dismiss();
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+            .create()
+            .show();
     }
-
-/* =====================================================
-   END ASSIGNMENT API CALL - WITH BETTER DEBUGGING
-   ===================================================== */
 
     private void endAssignment(int assignmentId, String serialNumber) {
         try {
             JSONObject body = new JSONObject();
             body.put("assignment_id", assignmentId);
-            body.put("staff_id", currentStaffId);
+            body.put("staff_id",      currentStaffId);
 
-            Log.d("EndAssignment", "Request URL: " + ApiConfig.END_ASSIGNMENT_URL);
-            Log.d("EndAssignment", "Request Body: " + body.toString());
+            Log.d("EndAssignment", "URL: "  + ApiConfig.END_ASSIGNMENT_URL);
+            Log.d("EndAssignment", "Body: " + body);
 
             JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.POST,
-                ApiConfig.END_ASSIGNMENT_URL,
-                body,
+                Request.Method.POST, ApiConfig.END_ASSIGNMENT_URL, body,
                 response -> {
                     try {
-                        Log.d("EndAssignment", "Response: " + response.toString());
-
+                        Log.d("EndAssignment", "Response: " + response);
                         if (response.optBoolean("success")) {
-                            Toast.makeText(this,
-                                "Assignment ended successfully",
-                                Toast.LENGTH_SHORT).show();
-                            loadDevices(); // Refresh the list
+                            Toast.makeText(this, "Assignment ended successfully", Toast.LENGTH_SHORT).show();
+                            loadDevices();
                         } else {
-                            String error = response.optString("error",
+                            String err = response.optString("error",
                                 response.optString("message", "Failed to end assignment"));
-                            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(this, "Parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e("EndAssignment", "Parse error: ", e);
                     }
                 },
                 error -> {
                     Log.e("EndAssignment", "Volley Error: ", error);
-
-                    // Detailed error logging
                     if (error.networkResponse != null) {
-                        Log.e("EndAssignment", "Status Code: " + error.networkResponse.statusCode);
+                        Log.e("EndAssignment", "Status: " + error.networkResponse.statusCode);
                         try {
-                            String responseBody = new String(error.networkResponse.data, "utf-8");
-                            Log.e("EndAssignment", "Response Body: " + responseBody);
-                        } catch (Exception e) {
-                            Log.e("EndAssignment", "Error reading response: ", e);
-                        }
+                            Log.e("EndAssignment", "Body: " +
+                                new String(error.networkResponse.data, "utf-8"));
+                        } catch (Exception ignored) {}
                     }
-
-                    if (error.getMessage() != null) {
-                        Log.e("EndAssignment", "Error Message: " + error.getMessage());
-                    }
-
                     Toast.makeText(this, "Network error. Please check connection.", Toast.LENGTH_SHORT).show();
                 }
             ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json");
-                    headers.put("Accept", "application/json");
-                    return headers;
+                @Override public Map<String, String> getHeaders() {
+                    Map<String, String> h = new HashMap<>();
+                    h.put("Content-Type", "application/json");
+                    h.put("Accept",       "application/json");
+                    return h;
                 }
-
-                @Override
-                public String getBodyContentType() {
+                @Override public String getBodyContentType() {
                     return "application/json; charset=utf-8";
                 }
             };
 
-            // Add timeout settings
             request.setRetryPolicy(new DefaultRetryPolicy(
-                10000, // 10 seconds timeout
+                10000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            ));
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
             requestQueue.add(request);
 
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error creating request: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.e("EndAssignment", "Request creation error: ", e);
         }
     }
 
@@ -351,21 +339,20 @@ public class CustomerActivity extends AppCompatActivity {
             .setCancelable(false)
             .create();
 
-        EditText inputName = dialogView.findViewById(R.id.inputUserName);
+        EditText inputName    = dialogView.findViewById(R.id.inputUserName);
         EditText inputContact = dialogView.findViewById(R.id.inputContactNumber);
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
-        dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnClose) .setOnClickListener(v -> dialog.dismiss());
 
         dialogView.findViewById(R.id.btnConfirm).setOnClickListener(v -> {
-            String name = inputName.getText().toString().trim();
+            String name    = inputName.getText().toString().trim();
             String contact = inputContact.getText().toString().trim();
 
             if (name.isEmpty()) {
                 inputName.setError("Required");
                 return;
             }
-
             if (!contact.matches("^09[0-9]{9}$")) {
                 inputContact.setError("Invalid number");
                 return;
@@ -378,41 +365,32 @@ public class CustomerActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    /* =====================================================
-       API CALL
-       ===================================================== */
-
     private void assignDevice(String serial, String name, String contact) {
         try {
             JSONObject body = new JSONObject();
-            body.put("serial_number", serial);
-            body.put("assigned_name", name);
+            body.put("serial_number",    serial);
+            body.put("assigned_name",    name);
             body.put("assigned_contact", contact);
-            body.put("staff_id", currentStaffId);
+            body.put("staff_id",         currentStaffId);
 
             Log.d("AssignRequest", body.toString());
 
             JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.POST,
-                ApiConfig.ASSIGN_DEVICE_URL,
-                body,
+                Request.Method.POST, ApiConfig.ASSIGN_DEVICE_URL, body,
                 response -> {
                     if (response.optBoolean("success")) {
                         Toast.makeText(this, "Assigned successfully", Toast.LENGTH_SHORT).show();
                         loadDevices();
                     } else {
-                        Toast.makeText(this,
-                            response.optString("message"),
-                            Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, response.optString("message"), Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> Toast.makeText(this, "Network error", Toast.LENGTH_SHORT).show()
             ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json");
-                    return headers;
+                @Override public Map<String, String> getHeaders() {
+                    Map<String, String> h = new HashMap<>();
+                    h.put("Content-Type", "application/json");
+                    return h;
                 }
             };
 

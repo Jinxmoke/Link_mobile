@@ -5,4 +5,28 @@
     <string name="nav_scan">Scan</string>
     <string name="nav_cart">Cart</string>
     <string name="nav_profile">Profile</string>
+
+        <!-- Profile Fragment Strings -->
+        <string name="edit_profile">Edit Profile</string>
+        <string name="change_picture">Change Picture</string>
+        <string name="profile_picture">Profile Picture</string>
+
+        <!-- Labels -->
+        <string name="full_name">Full Name</string>
+        <string name="email_address">Email Address</string>
+        <string name="contact_number">Contact Number</string>
+        <string name="role">Role</string>
+
+        <!-- Hints -->
+        <string name="enter_full_name">Enter your full name</string>
+        <string name="enter_contact_number">Enter your contact number</string>
+        <string name="placeholder_email">user@example.com</string>
+        <string name="placeholder_role">Administrator</string>
+
+        <!-- Buttons -->
+        <string name="save">Save</string>
+        <string name="cancel">Cancel</string>
+
+        <!-- Accessibility -->
+        <string name="readonly">Read-only field</string>
 </resources>
