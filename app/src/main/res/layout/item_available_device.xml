@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter__extrabold"
                 android:text="TX-2026-001"
-                android:textColor="#1a1a1a"
+                android:textColor="@color/text_primary"
                 android:textSize="13sp" />
 
             <TextView
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter_regular"
                 android:text="Device Name"
-                android:textColor="#64748B"
+                android:textColor="@color/gray_500"
                 android:textSize="10sp" />
 
             <LinearLayout
@@ -67,7 +67,7 @@
                     android:layout_height="16dp"
                     android:layout_marginEnd="4dp"
                     android:src="@drawable/ic_battery"
-                    app:tint="#64748B" />
+                    app:tint="@color/gray_500" />
 
                 <TextView
                     android:id="@+id/tvBatteryPercent"
@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
                     android:text="85%"
-                    android:textColor="#64748B"
+                    android:textColor="@color/gray_500"
                     android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>
@@ -91,7 +91,7 @@
             android:text="Assign"
             android:textSize="10sp"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:fontFamily="@font/inter_medium"
             android:letterSpacing="0.01"
             android:stateListAnimator="@null"
@@ -105,5 +105,5 @@
         android:layout_height="1dp"
         android:layout_marginStart="88dp"
         android:layout_marginEnd="16dp"
-        android:background="#E2E8F0" />
+        android:background="@color/gray_200" />
 </LinearLayout>

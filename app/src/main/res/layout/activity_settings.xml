@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF"
+    android:background="@color/white"
     android:fitsSystemWindows="true">
 
     <!-- Header Section -->
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         android:padding="20dp"
         android:gravity="center_vertical">
 
@@ -30,7 +30,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:src="@drawable/back"
-            app:tint="#0F172A" />
+                app:tint="@color/gray_900" />
 
         </FrameLayout>
 
@@ -56,7 +56,7 @@
                 android:layout_marginTop="8dp"
                 android:fontFamily="@font/inter_regular"
                 android:text="Update your account password securely"
-                android:textColor="#999999"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
         </LinearLayout>
 
@@ -87,7 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:background="#FFE8DC"
+                android:background="@color/background_orange"
                 android:padding="16dp"
                 android:layout_marginBottom="24dp"
                 android:gravity="center_vertical">
@@ -97,7 +97,7 @@
                     android:layout_height="20dp"
                     android:layout_marginEnd="12dp"
                     android:src="@drawable/ic_info"
-                    app:tint="#FF6B2B" />
+                    app:tint="@color/primary_orange_dark" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -105,7 +105,7 @@
                     android:layout_weight="1"
                     android:lineSpacingMultiplier="1.5"
                     android:text="Use a strong password with at least 8 characters, including uppercase, lowercase, and numbers."
-                    android:textColor="#C94D1A"
+                    android:textColor="@color/primary_orange_dark"
                     android:textSize="12sp"
                     android:fontFamily="@font/inter_regular" />
 
@@ -118,7 +118,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="Current Password"
                 android:textSize="13sp"
-                android:textColor="#0F172A"
+                android:textColor="@color/gray_900"
                 android:fontFamily="@font/inter_medium" />
 
             <RelativeLayout
@@ -136,8 +136,8 @@
                     android:paddingStart="16dp"
                     android:paddingEnd="56dp"
                     android:textSize="15sp"
-                    android:textColor="#0F172A"
-                    android:textColorHint="#94A3B8"
+                    android:textColor="@color/gray_900"
+                    android:textColorHint="@color/nav_icon_color"
                     android:fontFamily="@font/inter_regular"
                     android:background="@null"
                     android:elevation="0dp" />
@@ -151,7 +151,7 @@
                     android:layout_marginEnd="16dp"
                     android:src="@drawable/ic_eye"
                     android:contentDescription="Toggle password visibility"
-                    app:tint="#64748B"
+                    app:tint="@color/gray_500"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless" />
@@ -165,7 +165,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="New Password"
                 android:textSize="13sp"
-                android:textColor="#0F172A"
+                android:textColor="@color/gray_900"
                 android:fontFamily="@font/inter_medium" />
 
             <RelativeLayout
@@ -183,8 +183,8 @@
                     android:paddingStart="16dp"
                     android:paddingEnd="56dp"
                     android:textSize="15sp"
-                    android:textColor="#0F172A"
-                    android:textColorHint="#94A3B8"
+                    android:textColor="@color/gray_900"
+                    android:textColorHint="@color/nav_icon_color"
                     android:fontFamily="@font/inter_regular"
                     android:background="@null"
                     android:elevation="0dp" />
@@ -198,7 +198,7 @@
                     android:layout_marginEnd="16dp"
                     android:src="@drawable/ic_eye"
                     android:contentDescription="Toggle password visibility"
-                    app:tint="#64748B"
+                    app:tint="@color/gray_500"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless" />
@@ -223,7 +223,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="#E5E7EB"
+                        android:background="@color/gray_300"
                         android:layout_marginEnd="2dp" />
 
                     <View
@@ -231,7 +231,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="#E5E7EB"
+                        android:background="@color/gray_300"
                         android:layout_marginEnd="2dp" />
 
                     <View
@@ -239,7 +239,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="#E5E7EB"
+                        android:background="@color/gray_300"
                         android:layout_marginEnd="2dp" />
 
                     <View
@@ -247,7 +247,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="#E5E7EB" />
+                        android:background="@color/gray_300" />
 
                 </LinearLayout>
 
@@ -256,7 +256,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
-                    android:textColor="#64748B"
+                    android:textColor="@color/gray_500"
                     android:fontFamily="@font/inter_regular" />
 
             </LinearLayout>
@@ -268,7 +268,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="Confirm New Password"
                 android:textSize="13sp"
-                android:textColor="#0F172A"
+                android:textColor="@color/gray_900"
                 android:fontFamily="@font/inter_medium" />
 
             <RelativeLayout
@@ -286,8 +286,8 @@
                     android:paddingStart="16dp"
                     android:paddingEnd="56dp"
                     android:textSize="15sp"
-                    android:textColor="#0F172A"
-                    android:textColorHint="#94A3B8"
+                    android:textColor="@color/gray_900"
+                    android:textColorHint="@color/nav_icon_color"
                     android:fontFamily="@font/inter_regular"
                     android:background="@null"
                     android:elevation="0dp" />
@@ -301,7 +301,7 @@
                     android:layout_marginEnd="16dp"
                     android:src="@drawable/ic_eye"
                     android:contentDescription="Toggle password visibility"
-                    app:tint="#64748B"
+                    app:tint="@color/gray_500"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless" />
@@ -327,7 +327,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="24dp"

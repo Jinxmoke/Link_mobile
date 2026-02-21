@@ -64,5 +64,6 @@
     <color name="border_light">#E8E8E8</color>
 
     <!-- State Colors -->
-    <color name="disabled">#E0E0E0</color>
+    <color name="disabled">#F8FAFC</color>
+    <color name="disable_border">#CBD5E1</color>
 </resources>

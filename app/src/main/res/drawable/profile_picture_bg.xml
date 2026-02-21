@@ -3,6 +3,6 @@
     android:shape="oval">
     <solid android:color="@color/background_light" />
     <stroke
-        android:color="@color/gradient_orange_start"
+        android:color="#EEEEEE"
         android:width="2dp" />
 </shape>

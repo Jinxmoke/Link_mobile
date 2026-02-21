@@ -8,24 +8,25 @@ import android.content.pm.PackageManager;
 import androidx.core.content.ContextCompat;
 
 public class SharedPrefManager {
-    // Use the SAME keys as your LoginActivity
     private static final String PREFS_NAME = "LinkPrefs";
     private static final String KEY_USER_ID   = "user_id";
     private static final String KEY_USERNAME  = "username";
     private static final String KEY_EMAIL     = "email";
     private static final String KEY_USER_TYPE = "user_type";
     private static final String KEY_STAFF_ID  = "staff_id";
-    private static final String KEY_IS_LOGGED_IN = "is_logged_in";
-    private static final String KEY_STAFF_NAME  = "staff_name";
-    private static final String KEY_CONTACT     = "contact";
+    private static final String KEY_IS_LOGGED_IN     = "is_logged_in";
+    private static final String KEY_STAFF_NAME       = "staff_name";
+    private static final String KEY_CONTACT          = "contact";
+    private static final String KEY_STAFF_PERMISSION = "staff_permission";
+    private static final String KEY_PROFILE_PICTURE  = "profile_picture"; // NEW
 
     // Permission related keys
-    private static final String KEY_PERMISSIONS_REQUESTED        = "permissions_requested";
-    private static final String KEY_FIRST_TIME_LAUNCH            = "first_time_launch";
-    private static final String KEY_CAMERA_PERMISSION_GRANTED    = "camera_permission_granted";
-    private static final String KEY_LOCATION_PERMISSION_GRANTED  = "location_permission_granted";
-    private static final String KEY_PERMISSION_SCREEN_SHOWN      = "permission_screen_shown";
-    private static final String KEY_PERMISSION_DENIED_COUNT      = "permission_denied_count";
+    private static final String KEY_PERMISSIONS_REQUESTED       = "permissions_requested";
+    private static final String KEY_FIRST_TIME_LAUNCH           = "first_time_launch";
+    private static final String KEY_CAMERA_PERMISSION_GRANTED   = "camera_permission_granted";
+    private static final String KEY_LOCATION_PERMISSION_GRANTED = "location_permission_granted";
+    private static final String KEY_PERMISSION_SCREEN_SHOWN     = "permission_screen_shown";
+    private static final String KEY_PERMISSION_DENIED_COUNT     = "permission_denied_count";
 
     private static SharedPrefManager instance;
     private final Context mCtx;
@@ -50,17 +51,18 @@ public class SharedPrefManager {
     // ──────────────────────────────────────────────────────────────────────────
 
     public void saveUser(int userId, String username, String email, String userType,
-                         String contact, String staffName, int staffId) {
+                         String contact, String staffName, int staffId, String staffPermission) {
         mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
-            .putInt   (KEY_USER_ID,      userId)
-            .putString(KEY_USERNAME,     username)
-            .putString(KEY_EMAIL,        email)
-            .putString(KEY_USER_TYPE,    userType)
-            .putString(KEY_CONTACT,      contact)
-            .putString(KEY_STAFF_NAME,   staffName)
-            .putInt   (KEY_STAFF_ID,     staffId)
-            .putBoolean(KEY_IS_LOGGED_IN, true)
+            .putInt   (KEY_USER_ID,          userId)
+            .putString(KEY_USERNAME,         username)
+            .putString(KEY_EMAIL,            email)
+            .putString(KEY_USER_TYPE,        userType)
+            .putString(KEY_CONTACT,          contact)
+            .putString(KEY_STAFF_NAME,       staffName)
+            .putInt   (KEY_STAFF_ID,         staffId)
+            .putString(KEY_STAFF_PERMISSION, staffPermission)
+            .putBoolean(KEY_IS_LOGGED_IN,    true)
             .apply();
     }
 
@@ -104,22 +106,33 @@ public class SharedPrefManager {
             .getString(KEY_STAFF_NAME, "");
     }
 
-    // ── NEW: setters used by ProfileFragment to persist edits ─────────────────
-
-    /** Update the staff/display name without touching any other field. */
-    public void setStaffName(String name) {
-        mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_STAFF_NAME, name)
-            .apply();
+    public String getStaffPermission() {
+        return mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_STAFF_PERMISSION, "map-only");
     }
 
-    /** Update the contact number without touching any other field. */
+    // ── Setters used by ProfileFragment ───────────────────────────────────────
+
+    public void setStaffName(String name) {
+        mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_STAFF_NAME, name).apply();
+    }
+
     public void setContact(String contact) {
         mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_CONTACT, contact)
-            .apply();
+            .edit().putString(KEY_CONTACT, contact).apply();
+    }
+
+    /** Save the server-returned profile picture path/URL. */
+    public void setProfilePicture(String path) {
+        mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_PROFILE_PICTURE, path).apply();
+    }
+
+    /** Retrieve the cached profile picture path/URL (empty string if not set). */
+    public String getProfilePicture() {
+        return mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_PROFILE_PICTURE, "");
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -135,7 +148,9 @@ public class SharedPrefManager {
             .remove(KEY_USER_TYPE)
             .remove(KEY_STAFF_ID)
             .remove(KEY_STAFF_NAME)
+            .remove(KEY_STAFF_PERMISSION)
             .remove(KEY_CONTACT)
+            .remove(KEY_PROFILE_PICTURE)
             .putBoolean(KEY_IS_LOGGED_IN, false)
             .apply();
     }
@@ -243,8 +258,8 @@ public class SharedPrefManager {
     }
 
     public boolean shouldShowPermissionScreen() {
-        if (isFirstTimeLaunch())        return true;
-        if (!arePermissionsRequested()) return true;
+        if (isFirstTimeLaunch())         return true;
+        if (!arePermissionsRequested())  return true;
         if (areCriticalPermissionsMissing()) {
             return getPermissionDeniedCount() < 2;
         }
@@ -266,12 +281,12 @@ public class SharedPrefManager {
     }
 
     public String getPermissionStats() {
-        return "First Launch: "           + isFirstTimeLaunch()          + "\n" +
-            "Permissions Requested: "  + arePermissionsRequested()    + "\n" +
-            "Permission Screen Shown: "+ isPermissionScreenShown()    + "\n" +
-            "Camera Permission: "      + isCameraPermissionGranted()  + "\n" +
-            "Location Permission: "    + isLocationPermissionGranted()+ "\n" +
-            "Denied Count: "           + getPermissionDeniedCount();
+        return "First Launch: "            + isFirstTimeLaunch()           + "\n" +
+            "Permissions Requested: "   + arePermissionsRequested()     + "\n" +
+            "Permission Screen Shown: " + isPermissionScreenShown()     + "\n" +
+            "Camera Permission: "       + isCameraPermissionGranted()   + "\n" +
+            "Location Permission: "     + isLocationPermissionGranted() + "\n" +
+            "Denied Count: "            + getPermissionDeniedCount();
     }
 
     public void saveCurrentPermissionStates() {

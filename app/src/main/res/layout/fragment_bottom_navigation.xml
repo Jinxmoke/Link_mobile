@@ -12,7 +12,7 @@
         android:layout_alignParentBottom="true"
         >
 
-    <com.example.link.CurvedBottom
+        <com.example.link.CurvedBottom
             android:id="@+id/bottomNavigation"
             android:layout_width="match_parent"
             android:layout_height="90dp"
@@ -235,7 +235,7 @@
             android:layout_gravity="center"
             android:src="@drawable/ic_qr_code"
             android:contentDescription="QR Scanner"
-            app:tint="@android:color/white" />
+            app:tint="@color/white" />
     </FrameLayout>
 
 </RelativeLayout>

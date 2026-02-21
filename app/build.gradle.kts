@@ -75,4 +75,6 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx:23.4.1")
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("com.google.firebase:firebase-analytics-ktx:21.5.0")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

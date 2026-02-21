@@ -7,7 +7,7 @@
     android:layout_marginHorizontal="4dp"
     app:cardCornerRadius="12dp"
     android:elevation="0dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/white"
     android:foreground="?attr/selectableItemBackgroundBorderless"
     android:clickable="true"
     android:focusable="true">
@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:text="Serial Number"
                     android:fontFamily="@font/inter_regular"
-                    android:textColor="#94A3B8"
+                    android:textColor="@color/nav_icon_color"
                     android:textSize="11sp"
                     android:letterSpacing="-0.01"
                     android:layout_marginBottom="2dp" />
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:text="HELTEC-V4"
                     android:fontFamily="@font/inter__extrabold"
-                    android:textColor="#0F172A"
+                    android:textColor="@color/gray_900"
                     android:textSize="14sp"
                     android:letterSpacing="-0.01" />
             </LinearLayout>
@@ -76,7 +76,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#F1F5F9"
+            android:background="@color/gray_200"
             android:layout_marginBottom="12dp" />
 
         <!-- Two Column Layout -->
@@ -105,7 +105,7 @@
                         android:layout_height="wrap_content"
                         android:text="Customer Name"
                         android:fontFamily="@font/inter_regular"
-                        android:textColor="#94A3B8"
+                        android:textColor="@color/nav_icon_color"
                         android:textSize="11sp"
                         android:letterSpacing="-0.01"
                         android:layout_marginBottom="2px" />
@@ -116,7 +116,7 @@
                         android:layout_height="wrap_content"
                         android:text="Michael"
                         android:fontFamily="@font/inter_medium"
-                        android:textColor="#0F172A"
+                        android:textColor="@color/gray_900"
                         android:textSize="12sp"
                         android:letterSpacing="-0.01" />
                 </LinearLayout>
@@ -132,7 +132,7 @@
                         android:layout_height="wrap_content"
                         android:text="Longitude"
                         android:fontFamily="@font/inter_regular"
-                        android:textColor="#94A3B8"
+                        android:textColor="@color/nav_icon_color"
                         android:textSize="11sp"
                         android:letterSpacing="-0.01"
                         android:layout_marginBottom="2px" />
@@ -143,7 +143,7 @@
                         android:layout_height="wrap_content"
                         android:text="120.21298"
                         android:fontFamily="@font/inter_medium"
-                        android:textColor="#0F172A"
+                        android:textColor="@color/gray_900"
                         android:textSize="12sp"
                         android:letterSpacing="-0.01" />
                 </LinearLayout>
@@ -169,7 +169,7 @@
                         android:layout_height="wrap_content"
                         android:text="Last Seen"
                         android:fontFamily="@font/inter_regular"
-                        android:textColor="#94A3B8"
+                        android:textColor="@color/nav_icon_color"
                         android:textSize="11sp"
                         android:letterSpacing="-0.01"
                         android:layout_marginBottom="2px" />
@@ -180,7 +180,7 @@
                         android:layout_height="wrap_content"
                         android:text="1/11/2026 12:00 PM"
                         android:fontFamily="@font/inter_medium"
-                        android:textColor="#0F172A"
+                        android:textColor="@color/gray_900"
                         android:textSize="12sp"
                         android:letterSpacing="-0.01" />
                 </LinearLayout>
@@ -196,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:text="Latitude"
                         android:fontFamily="@font/inter_regular"
-                        android:textColor="#94A3B8"
+                        android:textColor="@color/nav_icon_color"
                         android:textSize="11sp"
                         android:letterSpacing="-0.01"
                         android:layout_marginBottom="2px" />
@@ -207,7 +207,7 @@
                         android:layout_height="wrap_content"
                         android:text="14.92839"
                         android:fontFamily="@font/inter_medium"
-                        android:textColor="#0F172A"
+                        android:textColor="@color/gray_900"
                         android:textSize="12sp"
                         android:letterSpacing="-0.01" />
                 </LinearLayout>

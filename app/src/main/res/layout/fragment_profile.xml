@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
@@ -16,6 +17,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="32dp">
 
             <TextView
@@ -23,15 +25,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Profile"
-                android:textSize="28sp"
-                android:textStyle="bold"
+                android:textSize="20sp"
+                android:fontFamily="@font/poppins_semibold"
                 android:textColor="@color/text_primary" />
 
             <ImageButton
                 android:id="@+id/edit_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/dash_home"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/edit_ic"
                 android:contentDescription="@string/edit_profile"
                 android:background="?attr/selectableItemBackground"
                 android:scaleType="centerInside" />
@@ -44,13 +46,16 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="32dp">
 
-            <ImageView
+            <!-- Replaced ImageView with ShapeableImageView for circular clipping -->
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profile_picture"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:scaleType="centerCrop"
                 android:contentDescription="@string/profile_picture"
-                android:background="@drawable/profile_picture_bg" />
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                app:strokeColor="@color/disable_border"
+                app:strokeWidth="1dp" />
 
             <ImageButton
                 android:id="@+id/camera_button"
@@ -69,15 +74,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/full_name"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/text_secondary"
-                android:textStyle="bold"
+                android:fontFamily="@font/poppins_regular"
                 android:letterSpacing="0.05"
                 android:layout_marginBottom="8dp" />
 
@@ -101,15 +106,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/email_address"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/text_secondary"
-                android:textStyle="bold"
+                android:fontFamily="@font/poppins_regular"
                 android:letterSpacing="0.05"
                 android:layout_marginBottom="8dp" />
 
@@ -126,7 +131,7 @@
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:text="@string/placeholder_email"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/disable_border"
                     android:textSize="14sp" />
 
                 <ImageView
@@ -144,15 +149,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="15dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/contact_number"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/text_secondary"
-                android:textStyle="bold"
+                android:fontFamily="@font/poppins_regular"
                 android:letterSpacing="0.05"
                 android:layout_marginBottom="8dp" />
 
@@ -182,9 +187,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/role"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textColor="@color/text_secondary"
-                android:textStyle="bold"
+                android:fontFamily="@font/poppins_regular"
                 android:letterSpacing="0.05"
                 android:layout_marginBottom="8dp" />
 
@@ -199,7 +204,7 @@
                     android:layout_height="match_parent"
                     android:text="@string/placeholder_role"
                     android:textSize="14sp"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/disable_border"
                     android:gravity="center_vertical"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
@@ -223,7 +228,7 @@
             android:visibility="gone"
             android:id="@+id/action_buttons_container">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/cancel_button"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
@@ -234,14 +239,14 @@
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/save_button"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:text="@string/save"
                 android:textSize="14sp"
                 android:textColor="@color/white"
-                android:background="@drawable/button_primary_bg"
+                android:background="@drawable/orange_rounded_button"
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
                 android:layout_marginStart="16dp" />

@@ -24,7 +24,7 @@
         android:text="Permissions Required"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="@color/black"
         android:layout_marginBottom="16dp"
         android:layout_gravity="center" />
 
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:text="To provide the best emergency response experience, we need the following permissions:"
         android:textSize="16sp"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/text_secondary"
         android:lineSpacingExtra="4dp"
         android:layout_marginBottom="32dp"
         android:gravity="center" />
@@ -73,14 +73,14 @@
                     android:text="Camera"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/black" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="For QR Code Scanner"
                     android:textSize="14sp"
-                    android:textColor="@android:color/darker_gray" />
+                    android:textColor="@color/text_secondary" />
             </LinearLayout>
         </LinearLayout>
 
@@ -95,7 +95,7 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_location"
- />
+                />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -109,14 +109,14 @@
                     android:text="Location"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/black" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="For accurate emergency response mapping"
                     android:textSize="14sp"
-                    android:textColor="@android:color/darker_gray" />
+                    android:textColor="@color/text_secondary" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -128,8 +128,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:padding="12dp"
-        android:background="@android:color/white"
-        android:textColor="@android:color/black"
+        android:background="@color/white"
+        android:textColor="@color/black"
         android:textSize="14sp"
         android:elevation="0dp" />
 
@@ -144,7 +144,7 @@
         android:fontFamily="@font/inter__extrabold"
         android:layout_marginBottom="16dp"
         android:backgroundTint="@color/primary_orange"
-        android:textColor="@android:color/white"
+        android:textColor="@color/white"
         style="@style/Widget.MaterialComponents.Button" />
 
     <!-- Skip Button (THIS IS A TextView, NOT Button) -->
@@ -154,7 +154,7 @@
         android:layout_height="wrap_content"
         android:text="Skip for now →"
         android:textSize="14sp"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/text_secondary"
         android:layout_gravity="center"
         android:padding="12dp"
         android:clickable="true"

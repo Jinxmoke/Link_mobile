@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/white"
     android:layout_marginBottom="16dp">
 
     <LinearLayout
@@ -33,7 +33,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Michael James"
-                    android:textColor="#0F172A"
+                    android:textColor="@color/gray_900"
                     android:textSize="13sp"
                     android:fontFamily="@font/inter__extrabold" />
 
@@ -42,7 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TX-2026-004"
-                    android:textColor="#64748B"
+                    android:textColor="@color/gray_500"
                     android:textSize="10sp"
                     android:fontFamily="@font/inter_regular" />
             </LinearLayout>
@@ -70,7 +70,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Active"
-                    android:textColor="#059669"
+                    android:textColor="@color/green_600"
                     android:textSize="10sp"
                     android:fontFamily="@font/inter_medium"
                     android:letterSpacing="0.02" />
@@ -98,7 +98,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Contact"
-                    android:textColor="#64748B"
+                    android:textColor="@color/gray_500"
                     android:textSize="10sp"
                     android:fontFamily="@font/inter_medium" />
 
@@ -107,7 +107,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="09058963056"
-                    android:textColor="#0F172A"
+                    android:textColor="@color/gray_900"
                     android:fontFamily="@font/inter_semibold"
                     android:textSize="14sp"
                     android:layout_marginTop="4dp"
@@ -118,7 +118,7 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="#E2E8F0"
+                android:background="@color/gray_200"
                 android:layout_marginEnd="16dp" />
 
             <LinearLayout
@@ -131,7 +131,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Assigned By"
-                    android:textColor="#64748B"
+                    android:textColor="@color/gray_500"
                     android:textSize="10sp"
                     android:fontFamily="@font/inter_medium" />
 
@@ -140,7 +140,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Javmoke"
-                    android:textColor="#0F172A"
+                    android:textColor="@color/gray_900"
                     android:textSize="14sp"
                     android:fontFamily="@font/inter_semibold"
                     android:layout_marginTop="4dp"
@@ -156,7 +156,7 @@
             android:layout_height="wrap_content"
             android:text="End Assignment"
             android:textSize="14sp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:background="@drawable/button_end_bg"
             android:paddingStart="24dp"
             android:paddingEnd="24dp"
