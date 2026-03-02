@@ -22,7 +22,8 @@ public class ApiConfig {
     public static final String GET_ACTIVE_CUSTOMERS_URL = BASE_URL + "get_active_customers.php";
 
     // SOS
-    public static final String GET_RESOLVED_SOS_URL  = BASE_URL + "get_resolved_sos.php";
+    public static final String GET_RESOLVED_SOS_URL       = BASE_URL + "get_resolved_sos.php";
+    public static final String GET_RESOLVED_SOS_COUNT_URL = BASE_URL + "get_resolved_sos_count.php";
     public static final String RESOLVE_SOS_BY_QR_URL = BASE_URL + "resolve_sos_by_qr.php";
 
     // Profile

@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +27,6 @@ public class BottomNavigationFragment extends Fragment {
     private LinearLayout homeSection, mapSection, profileSection, logoutSection;
 
     // ── Icons ─────────────────────────────────────────────────────────────────
-    // XML IDs:  homeIcon | mapIcon | profileIcon (in notificationSection) | LogoutIcon
     private ImageView homeIcon, mapIcon, profileIcon, logoutIcon;
 
     // ── Labels ────────────────────────────────────────────────────────────────
@@ -43,6 +43,9 @@ public class BottomNavigationFragment extends Fragment {
     private int     selectedColor, unselectedColor;
     private boolean isQRScannerOpen = false;
 
+    // ── Permission ────────────────────────────────────────────────────────────
+    private SharedPrefManager sharedPrefManager;
+
     public BottomNavigationFragment() {}
 
     @Nullable
@@ -58,15 +61,15 @@ public class BottomNavigationFragment extends Fragment {
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        sharedPrefManager = SharedPrefManager.getInstance(requireContext());
+
         selectedColor   = Color.parseColor("#F97316");
         unselectedColor = Color.parseColor("#94A3B8");
 
         // ── Sections ──────────────────────────────────────────────────────────
         homeSection    = view.findViewById(R.id.homeSection);
         mapSection     = view.findViewById(R.id.mapSection);
-        // XML "notificationSection" is visually the Profile tab
         profileSection = view.findViewById(R.id.notificationSection);
-        // XML "profileSection" is visually the Logout tab
         logoutSection  = view.findViewById(R.id.profileSection);
         centerButton   = view.findViewById(R.id.centerButton);
         centerIcon     = view.findViewById(R.id.centerIcon);
@@ -74,17 +77,13 @@ public class BottomNavigationFragment extends Fragment {
         // ── Icons ─────────────────────────────────────────────────────────────
         homeIcon    = view.findViewById(R.id.homeIcon);
         mapIcon     = view.findViewById(R.id.mapIcon);
-        // profileIcon is inside notificationSection in the XML
         profileIcon = view.findViewById(R.id.profileIcon);
-        // LogoutIcon is inside profileSection in the XML
         logoutIcon  = view.findViewById(R.id.LogoutIcon);
 
         // ── Labels ────────────────────────────────────────────────────────────
         homeLabel    = view.findViewById(R.id.homeLabel);
         mapLabel     = view.findViewById(R.id.mapLabel);
-        // notificationLabel = "Profile" in the XML
         profileLabel = view.findViewById(R.id.notificationLabel);
-        // profileLabel      = "Logout"  in the XML
         logoutLabel  = view.findViewById(R.id.profileLabel);
 
         // ── Indicators ────────────────────────────────────────────────────────
@@ -112,11 +111,55 @@ public class BottomNavigationFragment extends Fragment {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    //  Permission helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Returns the staff permission string.
+     * Possible values: "full-access", "map-only", "logs-only"
+     * Admins/super_admins get unrestricted access.
+     */
+    private String getPermission() {
+        return sharedPrefManager.getStaffPermission();
+    }
+
+    private boolean isAdmin() {
+        return sharedPrefManager.isAdmin()
+            || "super_admin".equals(sharedPrefManager.getUserType());
+    }
+
+    /** Returns true if this user may open the Map.
+     *  full-access → yes
+     *  map-only    → yes
+     *  logs-only   → no
+     */
+    private boolean canAccessMap() {
+        if (isAdmin()) return true;
+        String perm = getPermission();
+        return "full-access".equals(perm) || "map-only".equals(perm);
+    }
+
+    /** Returns true if this user may open the QR scanner (resolves SOS on map).
+     *  Same rule as Map access.
+     */
+    private boolean canAccessQR() {
+        if (isAdmin()) return true;
+        String perm = getPermission();
+        return "full-access".equals(perm) || "map-only".equals(perm);
+    }
+
+    private void showPermissionToast() {
+        Toast.makeText(requireContext(),
+            "You don't have permission to access this.",
+            Toast.LENGTH_SHORT).show();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     //  Click listeners
     // ─────────────────────────────────────────────────────────────────────────
     private void setupNavClickListeners() {
 
-        // 🏠 Home → TestFragment
+        // 🏠 Home → TestFragment (everyone can access)
         homeSection.setOnClickListener(v -> {
             if (!currentFragment.equals("home")) {
                 currentFragment = "home";
@@ -135,14 +178,18 @@ public class BottomNavigationFragment extends Fragment {
             }
         });
 
-        // 🗺 Map → MapFragment
+        // 🗺 Map → MapFragment (blocked for logs-only)
         mapSection.setOnClickListener(v -> {
+            if (!canAccessMap()) {
+                showPermissionToast();
+                return;
+            }
             if (!currentFragment.equals("map")) {
                 navigateToMap();
             }
         });
 
-        // 👤 Profile (XML notificationSection) → ProfileFragment
+        // 👤 Profile → ProfileFragment (everyone can access)
         profileSection.setOnClickListener(v -> {
             if (!currentFragment.equals("profile")) {
                 currentFragment = "profile";
@@ -161,11 +208,17 @@ public class BottomNavigationFragment extends Fragment {
             }
         });
 
-        // 🔓 Logout (XML profileSection) → confirmation dialog then LoginActivity
+        // 🔓 Logout (everyone can access)
         logoutSection.setOnClickListener(v -> showLogoutConfirmation());
 
-        // 🧭 Center QR button
-        centerButton.setOnClickListener(v -> toggleQRScanner());
+        // 🧭 Center QR button (blocked for logs-only)
+        centerButton.setOnClickListener(v -> {
+            if (!canAccessQR()) {
+                showPermissionToast();
+                return;
+            }
+            toggleQRScanner();
+        });
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -186,10 +239,8 @@ public class BottomNavigationFragment extends Fragment {
     private void performLogout() {
         if (getContext() == null) return;
 
-        // Clear the login session
         SharedPrefManager.getInstance(getContext()).logout();
 
-        // Navigate to LoginActivity and clear the back stack
         android.content.Intent intent = new android.content.Intent(
             getContext(), LoginActivity.class);
         intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK
@@ -204,6 +255,8 @@ public class BottomNavigationFragment extends Fragment {
         if (mapIcon == null || mapLabel == null || mapIndicator == null) return;
         if (currentFragment.equals("map")) return;
 
+        // Notification-driven navigation bypasses the permission gate
+        // (the alert was already shown; staff needs to see the location)
         currentFragment = "map";
         selectNavItem(mapIcon, mapLabel, mapIndicator);
         deselectOthers(

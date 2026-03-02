@@ -294,9 +294,28 @@ public class LoginActivity extends AppCompatActivity {
             editor.putInt("added_by", userObject.getInt("added_by"));
         }
 
+        // Save staff permission - this was the missing piece.
+        // The API returns this from staff_details.permission (joined in login.php).
+        String staffPermission = "logs-only"; // safest default
+        if (userObject.has("permission") && !userObject.isNull("permission")) {
+            staffPermission = userObject.getString("permission");
+        } else if (userObject.has("staff_permission") && !userObject.isNull("staff_permission")) {
+            staffPermission = userObject.getString("staff_permission");
+        }
+        editor.putString("staff_permission", staffPermission);
+
+        // Save profile picture if login.php returns it
+        if (userObject.has("profile_picture") && !userObject.isNull("profile_picture")) {
+            String profilePicture = userObject.getString("profile_picture");
+            if (!profilePicture.isEmpty()) {
+                editor.putString("profile_picture", profilePicture);
+            }
+        }
+
         editor.apply();
 
-        Log.d("LoginActivity", "Staff data saved: " + username + " (" + userType + ")");
+        Log.d("LoginActivity", "Staff data saved: " + username + " (" + userType + ")"
+            + " | permission=" + staffPermission);
     }
 
     private void redirectToMainActivity(JSONObject userObject) throws JSONException {

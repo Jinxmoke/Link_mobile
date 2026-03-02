@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.LinearLayout;
 import android.widget.Button;
@@ -50,6 +51,7 @@ public class TestFragment extends Fragment implements LocationListener {
     private TextView noDataText;
 
     // Profile Header Components
+    private ImageView profileImage;
     private TextView welcomeText;
     private TextView locationText;
 
@@ -65,6 +67,9 @@ public class TestFragment extends Fragment implements LocationListener {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_USER_ID = "user_id";
+
+    // Permission
+    private SharedPrefManager sharedPrefManager;
 
     // API
     private RequestQueue requestQueue;
@@ -82,6 +87,8 @@ public class TestFragment extends Fragment implements LocationListener {
         View view = inflater.inflate(R.layout.fragment_test, container, false);
 
         requestQueue = Volley.newRequestQueue(requireContext());
+
+        sharedPrefManager = SharedPrefManager.getInstance(requireContext());
 
         initializeViews(view);
         setupProfileHeader();
@@ -114,6 +121,7 @@ public class TestFragment extends Fragment implements LocationListener {
         noDataText = view.findViewById(R.id.noDataText);
 
         // Profile Header Views
+        profileImage = view.findViewById(R.id.profileImage);
         welcomeText = view.findViewById(R.id.welcomeText);
         locationText = view.findViewById(R.id.locationText);
     }
@@ -138,6 +146,22 @@ public class TestFragment extends Fragment implements LocationListener {
 
         if (welcomeText != null) {
             welcomeText.setText("Welcome, " + displayName);
+        }
+
+        // Load profile picture via Glide
+        if (profileImage != null) {
+            String picturePath = sharedPrefManager.getProfilePicture();
+            if (picturePath != null && !picturePath.isEmpty()) {
+                String imageUrl = picturePath.startsWith("http")
+                    ? picturePath
+                    : ApiConfig.UPLOADS_URL + picturePath;
+                com.bumptech.glide.Glide.with(this)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.profile)
+                    .error(R.drawable.profile)
+                    .centerCrop()
+                    .into(profileImage);
+            }
         }
 
         if (locationText != null) {
@@ -173,6 +197,7 @@ public class TestFragment extends Fragment implements LocationListener {
 
     private void loadData() {
         fetchActiveCustomers();
+        fetchResolvedSosCount();
     }
 
     private void fetchActiveCustomers() {
@@ -238,7 +263,7 @@ public class TestFragment extends Fragment implements LocationListener {
                         }
 
                         updateUI();
-                        updateDashboardStats(customerDevices.size(), 15); // Update active devices count
+                        updateDashboardStats(customerDevices.size(), -1); // resolved SOS count fetched separately
                     } else {
                         String message = response.optString("message", "Failed to load data");
                         android.util.Log.e("TestFragment", "API returned success=false: " + message);
@@ -317,8 +342,8 @@ public class TestFragment extends Fragment implements LocationListener {
             customerCardsContainer.addView(cardView);
         }
 
-        // Update dashboard stats with filtered count
-        updateDashboardStats(devicesWithValidLocation.size(), 15);
+        // Update active devices count (resolved SOS count updated separately)
+        updateDashboardStats(devicesWithValidLocation.size(), -1);
     }
 
     private boolean hasValidLocation(CustomerDevice device) {
@@ -605,9 +630,41 @@ public class TestFragment extends Fragment implements LocationListener {
         if (activeDevicesCount != null) {
             activeDevicesCount.setText(String.valueOf(activeDevices));
         }
-        if (activeSuccessfulCount != null) {
+        // -1 means skip — resolved SOS count is managed by fetchResolvedSosCount()
+        if (activeSuccessfulCount != null && successfulRescues >= 0) {
             activeSuccessfulCount.setText(String.valueOf(successfulRescues));
         }
+    }
+
+    private void fetchResolvedSosCount() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        int userId = prefs.getInt(KEY_USER_ID, 0);
+        if (userId == 0) return;
+
+        String url = ApiConfig.GET_RESOLVED_SOS_COUNT_URL + "?user_id=" + userId;
+
+        JsonObjectRequest request = new JsonObjectRequest(
+            Request.Method.GET,
+            url,
+            null,
+            response -> {
+                try {
+                    if (response.getBoolean("success")) {
+                        int count = response.getInt("resolved_count");
+                        if (isAdded() && activeSuccessfulCount != null) {
+                            requireActivity().runOnUiThread(() ->
+                                activeSuccessfulCount.setText(String.valueOf(count))
+                            );
+                        }
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("TestFragment", "Error parsing resolved SOS count: " + e.getMessage());
+                }
+            },
+            error -> android.util.Log.e("TestFragment", "Error fetching resolved SOS count: " + error.getMessage())
+        );
+
+        requestQueue.add(request);
     }
 
     private void startAutoRefresh() {
@@ -616,6 +673,7 @@ public class TestFragment extends Fragment implements LocationListener {
             public void run() {
                 if (isAdded() && getActivity() != null) {
                     fetchActiveCustomers();
+                    fetchResolvedSosCount();
                     refreshHandler.postDelayed(this, REFRESH_INTERVAL);
                 }
             }
@@ -726,8 +784,67 @@ public class TestFragment extends Fragment implements LocationListener {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Permission helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private boolean isAdmin() {
+        return sharedPrefManager.isAdmin()
+            || "super_admin".equals(sharedPrefManager.getUserType());
+    }
+
+    private String getPermission() {
+        return sharedPrefManager.getStaffPermission(); // "full-access", "map-only", "logs-only"
+    }
+
+    /**
+     * Permission matrix for staff:
+     *
+     *   full-access → everything
+     *   map-only    → Map, Settings (ChangePassword), Profile
+     *   logs-only   → Customers, Settings (ChangePassword), Profile, History
+     *
+     * feature keys used below:
+     *   "history"    → HistoryActivity
+     *   "settings"   → ChangePasswordActivity  (Settings)
+     *   "customers"  → CustomerActivity
+     *   "activities" → DeviceLocationActivity
+     */
+    private boolean canAccess(String feature) {
+        if (isAdmin()) return true;
+        String perm = getPermission();
+        switch (feature) {
+            case "history":
+                // full-access and logs-only; map-only cannot
+                return "full-access".equals(perm) || "logs-only".equals(perm);
+            case "settings":
+                // everyone can access settings
+                return "full-access".equals(perm)
+                    || "map-only".equals(perm)
+                    || "logs-only".equals(perm);
+            case "customers":
+                // full-access only; map-only and logs-only cannot
+                return "full-access".equals(perm);
+            case "activities":
+                // full-access and logs-only; map-only cannot
+                return "full-access".equals(perm) || "logs-only".equals(perm);
+            default:
+                return true;
+        }
+    }
+
+    private void showPermissionToast() {
+        Toast.makeText(requireContext(),
+            "You don't have permission to access this.",
+            Toast.LENGTH_SHORT).show();
+    }
+
     // Navigation Handlers
     private void onHistoryClicked() {
+        if (!canAccess("history")) {
+            showPermissionToast();
+            return;
+        }
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), HistoryActivity.class);
             startActivity(intent);
@@ -735,6 +852,10 @@ public class TestFragment extends Fragment implements LocationListener {
     }
 
     private void onSettingsClicked() {
+        if (!canAccess("settings")) {
+            showPermissionToast();
+            return;
+        }
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
             startActivity(intent);
@@ -742,6 +863,10 @@ public class TestFragment extends Fragment implements LocationListener {
     }
 
     private void onCustomersClicked() {
+        if (!canAccess("customers")) {
+            showPermissionToast();
+            return;
+        }
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), CustomerActivity.class);
             startActivity(intent);
@@ -749,6 +874,10 @@ public class TestFragment extends Fragment implements LocationListener {
     }
 
     private void onActivitiesClicked() {
+        if (!canAccess("activities")) {
+            showPermissionToast();
+            return;
+        }
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), DeviceLocationActivity.class);
             startActivity(intent);
@@ -756,6 +885,10 @@ public class TestFragment extends Fragment implements LocationListener {
     }
 
     private void onSeeAllClicked() {
+        if (!canAccess("customers")) {
+            showPermissionToast();
+            return;
+        }
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), CustomerActivity.class);
             startActivity(intent);
