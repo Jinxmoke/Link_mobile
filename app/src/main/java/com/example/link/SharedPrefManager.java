@@ -9,16 +9,21 @@ import androidx.core.content.ContextCompat;
 
 public class SharedPrefManager {
     private static final String PREFS_NAME = "LinkPrefs";
-    private static final String KEY_USER_ID   = "user_id";
-    private static final String KEY_USERNAME  = "username";
-    private static final String KEY_EMAIL     = "email";
-    private static final String KEY_USER_TYPE = "user_type";
-    private static final String KEY_STAFF_ID  = "staff_id";
+
+    // User keys
+    private static final String KEY_USER_ID          = "user_id";
+    private static final String KEY_USERNAME         = "username";
+    private static final String KEY_EMAIL            = "email";
+    private static final String KEY_USER_TYPE        = "user_type";
+    private static final String KEY_STAFF_ID         = "staff_id";
     private static final String KEY_IS_LOGGED_IN     = "is_logged_in";
     private static final String KEY_STAFF_NAME       = "staff_name";
     private static final String KEY_CONTACT          = "contact";
     private static final String KEY_STAFF_PERMISSION = "staff_permission";
-    private static final String KEY_PROFILE_PICTURE  = "profile_picture"; // NEW
+    private static final String KEY_PROFILE_PICTURE  = "profile_picture";
+
+    // ── NEW: stores the owning admin's user_id so staff can scope their data
+    private static final String KEY_ADMIN_USER_ID    = "admin_user_id";
 
     // Permission related keys
     private static final String KEY_PERMISSIONS_REQUESTED       = "permissions_requested";
@@ -47,11 +52,29 @@ public class SharedPrefManager {
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    //  User data
+    //  User data  (original signature kept + new overload with adminUserId)
     // ──────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Original saveUser – kept for backward compatibility.
+     * adminUserId defaults to userId (i.e. the user IS the admin).
+     */
     public void saveUser(int userId, String username, String email, String userType,
                          String contact, String staffName, int staffId, String staffPermission) {
+        saveUser(userId, username, email, userType, contact, staffName, staffId, staffPermission, userId);
+    }
+
+    /**
+     * Full saveUser that also stores the owning admin's user_id.
+     * Call this from your login handler once the server returns admin_user_id.
+     *
+     * @param adminUserId  For an admin: same as userId.
+     *                     For staff: the user_id of the admin who created them
+     *                     (staff_details.added_by in the database).
+     */
+    public void saveUser(int userId, String username, String email, String userType,
+                         String contact, String staffName, int staffId, String staffPermission,
+                         int adminUserId) {
         mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
             .putInt   (KEY_USER_ID,          userId)
@@ -62,9 +85,14 @@ public class SharedPrefManager {
             .putString(KEY_STAFF_NAME,       staffName)
             .putInt   (KEY_STAFF_ID,         staffId)
             .putString(KEY_STAFF_PERMISSION, staffPermission)
+            .putInt   (KEY_ADMIN_USER_ID,    adminUserId)
             .putBoolean(KEY_IS_LOGGED_IN,    true)
             .apply();
     }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    //  Getters
+    // ──────────────────────────────────────────────────────────────────────────
 
     public boolean isLoggedIn() {
         return mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -111,6 +139,26 @@ public class SharedPrefManager {
             .getString(KEY_STAFF_PERMISSION, "map-only");
     }
 
+    /**
+     * Returns the user_id of the admin who owns this account's data.
+     *
+     * - If this user IS an admin  → returns their own userId.
+     * - If this user is staff     → returns the admin's userId that was stored at login.
+     *
+     * Always use this method (not getUserId()) when scoping API calls / Firebase queries.
+     */
+    public int getAdminUserId() {
+        SharedPreferences prefs = mCtx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        int storedAdminId = prefs.getInt(KEY_ADMIN_USER_ID, 0);
+
+        // Admin users are their own admin; also handles old installs that never
+        // stored KEY_ADMIN_USER_ID.
+        if (isAdmin() || storedAdminId == 0) {
+            return getUserId();
+        }
+        return storedAdminId;
+    }
+
     // ── Setters used by ProfileFragment ───────────────────────────────────────
 
     public void setStaffName(String name) {
@@ -151,6 +199,7 @@ public class SharedPrefManager {
             .remove(KEY_STAFF_PERMISSION)
             .remove(KEY_CONTACT)
             .remove(KEY_PROFILE_PICTURE)
+            .remove(KEY_ADMIN_USER_ID)
             .putBoolean(KEY_IS_LOGGED_IN, false)
             .apply();
     }
@@ -165,6 +214,10 @@ public class SharedPrefManager {
 
     public boolean isAdmin() {
         return "admin".equals(getUserType());
+    }
+
+    public boolean isSuperAdmin() {
+        return "super_admin".equals(getUserType());
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -258,21 +311,19 @@ public class SharedPrefManager {
     }
 
     public boolean shouldShowPermissionScreen() {
-        if (isFirstTimeLaunch())         return true;
-        if (!arePermissionsRequested())  return true;
-        if (areCriticalPermissionsMissing()) {
-            return getPermissionDeniedCount() < 2;
-        }
+        if (isFirstTimeLaunch())             return true;
+        if (!arePermissionsRequested())      return true;
+        if (areCriticalPermissionsMissing()) return getPermissionDeniedCount() < 2;
         return false;
     }
 
     public String getPermissionStatus() {
         boolean camera   = isCameraPermissionGranted();
         boolean location = isLocationPermissionGranted();
-        if (camera && location)   return "All permissions granted";
-        if (!camera && !location) return "Camera and Location permissions needed";
-        if (!camera)              return "Camera permission needed";
-        return                           "Location permission needed";
+        if (camera && location)    return "All permissions granted";
+        if (!camera && !location)  return "Camera and Location permissions needed";
+        if (!camera)               return "Camera permission needed";
+        return                            "Location permission needed";
     }
 
     public void clearAllPreferences() {

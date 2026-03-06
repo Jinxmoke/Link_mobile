@@ -35,11 +35,11 @@
             width: 100%;
         }
 
-        /* Modern Legend Styles - Updated from your design */
+        /* ── Modern Legend Styles ── */
         #mapLegend {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
+            bottom: 500px;
+            left: 10px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -53,8 +53,10 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        #mapLegend.collapsed {
-            transform: translateY(calc(100% - 50px));
+        #mapLegend.hidden-legend {
+            transform: translateX(-120%);
+            opacity: 0;
+            pointer-events: none;
         }
 
         .legend-header {
@@ -123,28 +125,11 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .legend-dot.cyan {
-            background: #06b6d4;
-            box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
-        }
-
-        .legend-dot.red {
-            background: #ef4444;
-            animation: pulse 1.5s infinite;
-        }
-
-        .legend-dot.green {
-            background: #10b981;
-        }
-
-        .legend-dot.slate {
-            background: #64748b;
-        }
-
-        .legend-dot.blue {
-            background: #3b82f6;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-        }
+        .legend-dot.cyan  { background: #06b6d4; box-shadow: 0 0 12px rgba(6, 182, 212, 0.5); }
+        .legend-dot.red   { background: #ef4444; animation: pulse 1.5s infinite; }
+        .legend-dot.green { background: #10b981; }
+        .legend-dot.slate { background: #64748b; }
+        .legend-dot.blue  { background: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6); }
 
         .legend-text {
             font-size: 12px;
@@ -160,20 +145,9 @@
             text-align: center;
         }
 
-        .legend-stat.cyan-bg {
-            background: rgba(6, 182, 212, 0.1);
-            color: #0891b2;
-        }
-
-        .legend-stat.red-bg {
-            background: rgba(239, 68, 68, 0.1);
-            color: #b91c1c;
-        }
-
-        .legend-stat.green-bg {
-            background: rgba(16, 185, 129, 0.1);
-            color: #047857;
-        }
+        .legend-stat.cyan-bg  { background: rgba(6, 182, 212, 0.1);  color: #0891b2; }
+        .legend-stat.red-bg   { background: rgba(239, 68, 68, 0.1);   color: #b91c1c; }
+        .legend-stat.green-bg { background: rgba(16, 185, 129, 0.1);  color: #047857; }
 
         .legend-divider {
             height: 1px;
@@ -189,26 +163,10 @@
             letter-spacing: 0.3px;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            50% {
-                opacity: 0.8;
-                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-            }
-        }
-
-        .pulse-ring {
-            animation: pulse 1.5s infinite;
-        }
-
-        /* Keep all your existing styles below */
+        /* ── Legacy legend classes (kept for compatibility) ── */
         .legend {
             padding: 10px 12px;
             font: 14px Arial, Helvetica, sans-serif;
-            background: white;
             background: rgba(255,255,255,0.97);
             box-shadow: 0 2px 12px rgba(0,0,0,0.15);
             border-radius: 8px;
@@ -237,10 +195,7 @@
             justify-content: space-between;
         }
 
-        .legend h4:active {
-            cursor: grabbing;
-            cursor: -webkit-grabbing;
-        }
+        .legend h4:active { cursor: grabbing; cursor: -webkit-grabbing; }
 
         .legend-minimize-btn {
             background: none;
@@ -257,42 +212,7 @@
             transition: color 0.2s ease;
         }
 
-        .legend-minimize-btn:hover {
-            color: #333;
-        }
-
-        .legend-content {
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            max-height: 500px;
-            opacity: 1;
-            overflow: hidden;
-        }
-
-        .legend-content.collapsed {
-            max-height: 0;
-            opacity: 0;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .legend-icon {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid white;
-            margin-right: 10px;
-            box-shadow: 0 0 3px rgba(0,0,0,0.3);
-        }
-
-        .legend-text {
-            font-size: 13px;
-            color: #555;
-            font-weight: 500;
-        }
+        .legend-minimize-btn:hover { color: #333; }
 
         .legend-stats {
             margin-top: 12px;
@@ -303,21 +223,9 @@
             line-height: 1.6;
         }
 
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .stat-label {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: #333;
-        }
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .stat-label { color: #666; font-weight: 500; }
+        .stat-value { font-weight: bold; color: #333; }
 
         .staff-stat {
             color: #2196F3;
@@ -328,50 +236,35 @@
             display: inline-block;
         }
 
-        .sos-stat {
-            color: #F44336;
-            animation: blink 1s infinite;
+        .sos-stat { color: #F44336; animation: blink 1s infinite; }
+
+        /* ── Animations ── */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50%       { opacity: 0.8; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
         }
 
         @keyframes blink {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50%       { opacity: 0.5; }
         }
 
         @keyframes pulse-old {
-            0% { transform: scale(0.8); opacity: 0.7; }
-            50% { transform: scale(1.1); opacity: 1; }
+            0%   { transform: scale(0.8); opacity: 0.7; }
+            50%  { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(0.8); opacity: 0.7; }
         }
 
-        .station-popup {
-            min-width: 200px;
-            font-family: Arial, sans-serif;
-        }
+        .pulse-ring { animation: pulse 1.5s infinite; }
+        .blink      { animation: blink 1s infinite; }
 
-        .station-popup h4 {
-            margin: 0 0 8px;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
+        /* ── Popup classes ── */
+        .station-popup { min-width: 200px; font-family: Arial, sans-serif; }
+        .station-popup h4 { margin: 0 0 8px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .station-popup p  { margin: 4px 0; font-size: 13px; }
 
-        .station-popup p {
-            margin: 4px 0;
-            font-size: 13px;
-        }
-
-        .transmitter-popup {
-            min-width: 220px;
-            font-family: Arial, sans-serif;
-        }
-
-        .transmitter-popup h4 {
-            margin: 0 0 8px;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
+        .transmitter-popup { min-width: 220px; font-family: Arial, sans-serif; }
+        .transmitter-popup h4 { margin: 0 0 8px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; }
 
         .sos-popup {
             min-width: 280px;
@@ -389,64 +282,16 @@
             border-radius: 6px;
         }
 
-        .sos-alert {
-            color: #D32F2F;
-            font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 10px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            animation: blink 1s infinite;
-        }
+        .sos-alert { color: #D32F2F; font-weight: 700; font-size: 13px; margin-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; animation: blink 1s infinite; }
+        .sos-acknowledged { color: #FF9800; font-weight: 700; font-size: 13px; margin-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sos-resolved { color: #4CAF50; font-weight: 700; font-size: 13px; margin-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .sos-acknowledged {
-            color: #FF9800;
-            font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 10px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .sos-popup h4 { margin: 0 0 8px; color: #C62828; font-size: 14px; border-bottom: 1px solid rgba(244,67,54,0.2); padding-bottom: 6px; }
+        .acknowledged-popup h4 { margin: 0 0 8px; color: #EF6C00; font-size: 14px; border-bottom: 1px solid rgba(255,152,0,0.2); padding-bottom: 6px; }
+        .sos-popup p, .acknowledged-popup p { margin: 6px 0; font-size: 12px; color: #333; }
+        .sos-popup p strong, .acknowledged-popup p strong { color: #D32F2F; font-weight: 600; }
 
-        .sos-resolved {
-            color: #4CAF50;
-            font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 10px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .sos-popup h4 {
-            margin: 0 0 8px;
-            color: #C62828;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(244, 67, 54, 0.2);
-            padding-bottom: 6px;
-        }
-
-        .acknowledged-popup h4 {
-            margin: 0 0 8px;
-            color: #EF6C00;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255, 152, 0, 0.2);
-            padding-bottom: 6px;
-        }
-
-        .sos-popup p, .acknowledged-popup p {
-            margin: 6px 0;
-            font-size: 12px;
-            color: #333;
-        }
-
-        .sos-popup p strong, .acknowledged-popup p strong {
-            color: #D32F2F;
-            font-weight: 600;
-        }
-
+        /* ── Buttons ── */
         .ack-btn {
             width: 100%;
             margin-top: 10px;
@@ -464,21 +309,9 @@
             box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
         }
 
-        .ack-btn:hover {
-            background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .ack-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
-        }
-
-        .ack-btn.processing {
-            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-            cursor: wait;
-        }
+        .ack-btn:hover { background: linear-gradient(135deg, #E53935 0%, #C62828 100%); box-shadow: 0 4px 12px rgba(244,67,54,0.4); transform: translateY(-1px); }
+        .ack-btn:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(244,67,54,0.3); }
+        .ack-btn.processing { background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); cursor: wait; }
 
         .resolve-btn {
             width: 100%;
@@ -497,26 +330,11 @@
             box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
         }
 
-        .resolve-btn:hover {
-            background: linear-gradient(135deg, #43A047 0%, #1B5E20 100%);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-            transform: translateY(-1px);
-        }
+        .resolve-btn:hover { background: linear-gradient(135deg, #43A047 0%, #1B5E20 100%); box-shadow: 0 4px 12px rgba(76,175,80,0.4); transform: translateY(-1px); }
+        .resolve-btn:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(76,175,80,0.3); }
+        .resolve-btn.processing { background: linear-gradient(135deg, #8BC34A 0%, #689F38 100%); cursor: wait; }
 
-        .resolve-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
-        }
-
-        .resolve-btn.processing {
-            background: linear-gradient(135deg, #8BC34A 0%, #689F38 100%);
-            cursor: wait;
-        }
-
-        .blink {
-            animation: blink 1s infinite;
-        }
-
+        /* ── Firebase status ── */
         .firebase-status {
             position: absolute;
             bottom: 30px;
@@ -531,27 +349,10 @@
             font-family: Arial, sans-serif;
         }
 
-        .firebase-connected {
-            color: #4CAF50;
-        }
+        .firebase-connected    { color: #4CAF50; }
+        .firebase-disconnected { color: #F44336; }
 
-        .firebase-disconnected {
-            color: #F44336;
-        }
-
-        .leaflet-left .leaflet-control {
-            margin-left: 10px;
-            margin-top: 40px;
-        }
-
-        .ack-info {
-            background: #f0f7ff;
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 8px;
-            border-left: 3px solid #2196F3;
-        }
-
+        /* ── Staff badge ── */
         .staff-badge {
             position: absolute;
             top: 40px;
@@ -570,217 +371,30 @@
             white-space: nowrap;
         }
 
-        .toastify {
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        /* Remove white background from popups - Updated styling */
-        .leaflet-popup-content-wrapper {
-            background: transparent !important;
-            box-shadow: none !important;
-            border-radius: 12px !important;
-            padding: 0 !important;
-            overflow: hidden;
-        }
-
-        .leaflet-popup-content {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: transparent !important;
-            min-width: 280px;
-        }
-
-        .leaflet-popup-tip {
-            background: transparent !important;
-            box-shadow: none !important;
-        }
-
-        /* Modern popup styling with backdrop blur */
-        .modern-popup {
-            background: rgba(255, 255, 255, 0.85) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            border-radius: 16px !important;
-            padding: 16px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
-            color: #1e293b !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        }
-
-        .modern-popup.sos {
-            background: white;
-            border: 1px solid rgba(239, 68, 68, 0.3) !important;
-        }
-
-        .modern-popup.sos h4 {
-            color: #b91c1c !important;
-        }
-
-        .modern-popup.acknowledged {
-            background: white;
-            border: 1px solid rgba(245, 158, 11, 0.3) !important;
-        }
-
-        .modern-popup.acknowledged h4 {
-            color: #b45309 !important;
-        }
-
-        .modern-popup h4 {
-            margin: 0 0 12px 0 !important;
-            font-size: 15px !important;
-            font-weight: 600 !important;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-            padding-bottom: 8px !important;
-        }
-
-        .modern-popup p {
-            margin: 8px 0 !important;
-            font-size: 13px !important;
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-        }
-
-        .modern-popup p strong {
-            font-weight: 600 !important;
-            color: #475569 !important;
-        }
-
-        .modern-popup .badge {
-            display: inline-block !important;
-            padding: 4px 12px !important;
-            border-radius: 20px !important;
-            font-size: 11px !important;
-            font-weight: 600 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.3px !important;
-        }
-
-        .modern-popup .badge.online {
-            background: rgba(34, 197, 94, 0.2) !important;
-            color: #166534 !important;
-        }
-
-        .modern-popup .badge.sos {
-            background: rgba(239, 68, 68, 0.2) !important;
-            color: #b91c1c !important;
-            animation: blink 1s infinite !important;
-        }
-
-        .modern-popup .badge.acknowledged {
-            background: rgba(245, 158, 11, 0.2) !important;
-            color: #b45309 !important;
-        }
-
-        .modern-popup .metrics-grid {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 8px !important;
-            margin-top: 12px !important;
-        }
-
-        .modern-popup .metric-item {
-            background: rgb(254 222 222 / 50%) !important;
-            border-radius: 12px !important;
-            padding: 8px !important;
-            text-align: center !important;
-        }
-
-        .modern-popup .metric-label {
-            font-size: 10px !important;
-            color: #64748b !important;
-            margin-bottom: 2px !important;
-        }
-
-        .modern-popup .metric-value {
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            color: #0f172a !important;
-        }
-
-        .modern-popup .timestamp {
-            margin-top: 12px !important;
-            font-size: 10px !important;
-            color: #64748b !important;
-            text-align: right !important;
-            border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-            padding-top: 8px !important;
-        }
-
-        .modern-popup button {
-            width: 100% !important;
-            margin-top: 12px !important;
-            padding: 10px !important;
-            border: none !important;
-            border-radius: 12px !important;
-            font-weight: 600 !important;
-            font-size: 12px !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.3px !important;
-        }
-
-        .modern-popup button.ack-btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-            color: white !important;
-        }
-
-        .modern-popup button.ack-btn:hover {
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
-        }
-
-        .modern-popup button.resolve-btn {
-            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
-            color: white !important;
-        }
-
-        .modern-popup button.resolve-btn:hover {
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
-        }
-
-        /* Keep original marker styles */
-        .custom-div-icon {
-            background: transparent !important;
-            border: none !important;
-        }
-
-        /* ===== HEADER ROW ===== */
-        .sos-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            margin-bottom: 12px;
-        }
-
-        .serial {
-            font-weight: 700;
-            font-size: 12px;
-            margin: 0;
-            line-height: 1;
-        }
-
-        .badge.sos {
-            padding: 4px 10px;
+        /* ── Tenant badge ── */
+        .tenant-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
             font-size: 11px;
-            border-radius: 999px;
-            line-height: 1;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .ack-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            margin-bottom: 12px;
-        }
+        /* ── Toastify override ── */
+        .toastify { border-radius: 12px; margin-top: 20px; }
 
-        /* Update these CSS styles */
+        /* ── Legend toggle button ── */
         .legend-toggle {
             position: absolute;
             bottom: 80px;
@@ -803,58 +417,9 @@
             color: #334155;
         }
 
-        .legend-toggle:hover {
-            transform: scale(1.05);
-            background: white;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-        }
+        .legend-toggle:hover { transform: scale(1.05); background: white; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
 
-        .legend-toggle.legend-visible {
-            opacity: 0.8;
-            transform: translateX(0);
-        }
-
-        .legend-toggle.legend-hidden {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        #mapLegend {
-            position: absolute;
-            bottom: 500px;
-            left: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(226, 232, 240, 0.6);
-            width: 220px;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        #mapLegend.hidden-legend {
-            transform: translateX(-120%);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .legend-close-btn {
-            cursor: pointer;
-            font-size: 16px;
-            padding: 0 5px;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
-
-        .legend-close-btn:hover {
-            background: rgba(0, 0, 0, 0.05);
-        }
-
-        /* Zoom Controls */
+        /* ── Zoom controls ── */
         .zoom-controls {
             position: absolute;
             bottom: 135px;
@@ -883,17 +448,144 @@
             color: #334155;
         }
 
-        .zoom-btn:hover {
-            transform: scale(1.05);
-            background: white;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        .zoom-btn:hover  { transform: scale(1.05); background: white; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+        .zoom-btn:active { transform: scale(0.95); }
+
+        /* ── Remove white bg from Leaflet popups ── */
+        .leaflet-popup-content-wrapper {
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 12px !important;
+            padding: 0 !important;
+            overflow: hidden;
         }
 
-        .zoom-btn:active {
-            transform: scale(0.95);
+        .leaflet-popup-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            min-width: 280px;
         }
 
-        /* Geofence Circle Styles - Simple dashed circle only */
+        .leaflet-popup-tip { background: transparent !important; box-shadow: none !important; }
+
+        /* ── Modern popup with backdrop blur ── */
+        .modern-popup {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 16px !important;
+            padding: 16px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+            color: #1e293b !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        .modern-popup.sos          { background: white; border: 1px solid rgba(239, 68, 68, 0.3) !important; }
+        .modern-popup.sos h4       { color: #b91c1c !important; }
+        .modern-popup.acknowledged { background: white; border: 1px solid rgba(245, 158, 11, 0.3) !important; }
+        .modern-popup.acknowledged h4 { color: #b45309 !important; }
+
+        .modern-popup h4 {
+            margin: 0 0 12px 0 !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+            padding-bottom: 8px !important;
+        }
+
+        .modern-popup p {
+            margin: 8px 0 !important;
+            font-size: 13px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+
+        .modern-popup p strong { font-weight: 600 !important; color: #475569 !important; }
+
+        .modern-popup .badge {
+            display: inline-block !important;
+            padding: 4px 12px !important;
+            border-radius: 20px !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        .modern-popup .badge.online       { background: rgba(34, 197, 94, 0.2) !important;   color: #166534 !important; }
+        .modern-popup .badge.offline      { background: rgba(100, 116, 139, 0.2) !important;  color: #475569 !important; }
+        .modern-popup .badge.sos          { background: rgba(239, 68, 68, 0.2) !important;    color: #b91c1c !important; animation: blink 1s infinite !important; }
+        .modern-popup .badge.acknowledged { background: rgba(245, 158, 11, 0.2) !important;   color: #b45309 !important; }
+
+        .modern-popup .metrics-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            margin-top: 12px !important;
+        }
+
+        .modern-popup .metric-item {
+            background: rgb(254 222 222 / 50%) !important;
+            border-radius: 12px !important;
+            padding: 8px !important;
+            text-align: center !important;
+        }
+
+        .modern-popup .metric-label { font-size: 10px !important; color: #64748b !important; margin-bottom: 2px !important; }
+        .modern-popup .metric-value { font-size: 14px !important; font-weight: 600 !important; color: #0f172a !important; }
+
+        .modern-popup .timestamp {
+            margin-top: 12px !important;
+            font-size: 10px !important;
+            color: #64748b !important;
+            text-align: right !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+            padding-top: 8px !important;
+        }
+
+        .modern-popup button {
+            width: 100% !important;
+            margin-top: 12px !important;
+            padding: 10px !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        .modern-popup button.ack-btn     { background: linear-gradient(135deg, #ef4444, #dc2626) !important; color: white !important; }
+        .modern-popup button.ack-btn:hover { transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(239,68,68,0.4) !important; }
+        .modern-popup button.resolve-btn { background: linear-gradient(135deg, #22c55e, #16a34a) !important; color: white !important; }
+        .modern-popup button.resolve-btn:hover { transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(34,197,94,0.4) !important; }
+
+        /* ── SOS / ACK header rows ── */
+        .sos-header, .ack-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .serial { font-weight: 700; font-size: 12px; margin: 0; line-height: 1; }
+
+        .ack-info {
+            background: #f0f7ff;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            border-left: 3px solid #2196F3;
+        }
+
+        .custom-div-icon { background: transparent !important; border: none !important; }
+
         .geofence-circle {
             stroke: #8b5cf6;
             stroke-width: 2;
@@ -901,6 +593,8 @@
             fill: rgba(139, 92, 246, 0.05);
             pointer-events: none;
         }
+
+        .leaflet-left .leaflet-control { margin-left: 10px; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -912,8 +606,8 @@
     <div class="zoom-btn" onclick="zoomOut()">−</div>
 </div>
 
-<!-- Modern Legend Component - Unchanged -->
-<div id="mapLegend" class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-gray-200 w-56 z-[1000] transition-all duration-300 legend-visible">
+<!-- Modern Legend -->
+<div id="mapLegend">
     <div class="legend-header" onclick="toggleLegend()">
         <span>Map Legend</span>
         <small>Click to zoom</small>
@@ -972,10 +666,13 @@
     </div>
 </div>
 
-<!-- Add this button right after the mapLegend div, before the staff badge -->
+<!-- Legend toggle button -->
 <div id="mapLegendToggle" class="legend-toggle" onclick="toggleLegendVisibility()">
     <span><i class="fas fa-layer-group text-xs"></i></span>
 </div>
+
+<!-- Tenant badge: top-right -->
+<div id="tenantBadge" class="tenant-badge" style="display:none;"></div>
 
 <div id="firebaseStatus" class="firebase-status">
     <span id="firebaseStatusText">Connecting to Firebase...</span>
@@ -986,362 +683,129 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
-    // This allows the Android app to call JavaScript functions on the map
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  GLOBAL STATE
+    // ═══════════════════════════════════════════════════════════════════════════
     window.MapFunctions = window.MapFunctions || {};
 
-    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyB05O1RLnyUkZumm_RdKkYFF2Yt34OjX-Y",
         authDomain: "link-e5add.firebaseapp.com",
         databaseURL: "https://link-e5add-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "link-e5add"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Global variables
     let map;
-    let transmitterMarkers = {};
-    let activeSOSAlerts = {};      // Active (red) SOS markers
-    let acknowledgedMarkers = {};   // Acknowledged (orange) SOS markers
-    let activeSOSSerials = new Set();
+    let transmitterMarkers    = {};
+    let activeSOSAlerts       = {};   // "sos_<serial>" → Leaflet marker (red)
+    let acknowledgedMarkers   = {};   // "ack_<serial>" → Leaflet marker (orange)
+    let activeSOSSerials      = new Set();
     let acknowledgedSOSSerials = new Set();
-    let resolvedSOSSerials = new Set();
-    let sosAckStatus = {};
-    let receiverMarker = null;
+    let resolvedSOSSerials    = new Set();
+    let sosAckStatus          = {};
+    let userLocationMarker    = null;
     let markerCluster;
-    let onlineDevices = 0;
-    let sosAlerts = 0;
-    let acknowledgedSOSCount = 0;
-    let totalDevices = 0;
-    let legendControl = null;
-    let isDraggingLegend = false;
-    let dragOffset = { x: 0, y: 0 };
-    let userLocationMarker = null;
-    let isMapInitialized = false;
-    let currentStaff = null;
-    let legendCollapsed = false;
+    let isMapInitialized      = false;
+    let currentStaff          = null;
 
-    // Track base stations and geofences
-    let baseStations = {};
+    let onlineDevices         = 0;
+    let sosAlerts             = 0;
+    let acknowledgedSOSCount  = 0;
+    let totalDevices          = 0;
+
+    let baseStations    = {};
     let geofenceCircles = {};
 
-    // Toggle legend visibility (completely hide/show)
-    window.toggleLegendVisibility = function() {
-        const legend = document.getElementById('mapLegend');
-        const toggleBtn = document.getElementById('mapLegendToggle');
+    // ── TENANT ISOLATION ──────────────────────────────────────────────────────
+    // validAssignmentIds : Set<string> of assignment IDs belonging to this admin.
+    //                     When EMPTY and tenantFilterReady=false, NO filter is
+    //                     applied (fail-open so devices still display if the API
+    //                     is unreachable or not yet deployed).
+    // tenantFilterReady  : true once loadAdminAssignments() has returned.
+    //                     Before it returns we show everything; after it returns
+    //                     we only show records that pass isValidAssignment().
+    let validAssignmentIds  = new Set();
+    let tenantFilterReady   = false;   // ← KEY: prevents blank map while loading
+    let adminUserIdForFilter = null;
+    let listenersAttached    = false;  // prevents duplicate listener registration
 
-        if (legend.classList.contains('hidden-legend')) {
-            // Show legend
-            legend.classList.remove('hidden-legend');
-            toggleBtn.classList.add('visible');
-            toggleBtn.innerHTML = '<i class="fas fa-layer-group text-xs"></i>';
-            // Save preference
-            localStorage.setItem('legendHidden', 'false');
-        } else {
-            // Hide legend
-            legend.classList.add('hidden-legend');
-            toggleBtn.classList.remove('visible');
-            toggleBtn.innerHTML = '<i class="fas fa-layer-group text-xs"></i>️';
-            // Save preference
-            localStorage.setItem('legendHidden', 'true');
-        }
-    };
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  TENANT FILTER
+    //  isValidAssignment() returns TRUE when:
+    //    a) filter is not ready yet (fail-open – show everything), OR
+    //    b) filter IS ready AND the assignment is in the allowed set.
+    // ═══════════════════════════════════════════════════════════════════════════
 
-    // Initialize legend visibility based on saved preference
-    function initLegendVisibility() {
-        const legend = document.getElementById('mapLegend');
-        const toggleBtn = document.getElementById('mapLegendToggle');
-
-        // Check if user has a saved preference
-        const legendHidden = localStorage.getItem('legendHidden') === 'true';
-
-        if (legendHidden) {
-            legend.classList.add('hidden-legend');
-            toggleBtn.classList.remove('visible');
-            toggleBtn.innerHTML = '🗺️';
-        } else {
-            legend.classList.remove('hidden-legend');
-            toggleBtn.classList.add('visible');
-            toggleBtn.innerHTML = '📋';
-        }
+    function isValidAssignment(assignmentId) {
+        if (!tenantFilterReady) return true;                          // fail-open
+        return validAssignmentIds.has(String(assignmentId));
     }
 
-    // Zoom to marker type function
-    window.zoomToMarkerType = function(type) {
-        if (!map) return;
-
-        let bounds = [];
-
-        switch(type) {
-            case 'transmitter':
-                Object.values(transmitterMarkers).forEach(marker => {
-                    if (marker && marker.getLatLng) {
-                        bounds.push(marker.getLatLng());
-                    }
-                });
-                break;
-            case 'sos':
-                // Only zoom to active SOS markers
-                Object.values(activeSOSAlerts).forEach(marker => {
-                    if (marker && marker.getLatLng) {
-                        bounds.push(marker.getLatLng());
-                    }
-                });
-                break;
-            case 'acknowledged':
-                // Zoom to acknowledged markers
-                Object.values(acknowledgedMarkers).forEach(marker => {
-                    if (marker && marker.getLatLng) {
-                        bounds.push(marker.getLatLng());
-                    }
-                });
-                break;
-        }
-
-        if (bounds.length > 0) {
-            const group = L.featureGroup(bounds.map(latlng => L.marker(latlng)));
-            map.fitBounds(group.getBounds().pad(0.1));
-        } else {
-            // Optional: Show toast if no markers of that type
-            showToast(`No ${type} markers found`, 'info');
-        }
-    };
-
-    // Zoom functions
-    window.zoomIn = function() {
-        if (map) {
-            map.setZoom(map.getZoom() + 1);
-        }
-    };
-
-    window.zoomOut = function() {
-        if (map) {
-            map.setZoom(map.getZoom() - 1);
-        }
-    };
-
-    // Update last updated time
-    function updateLastUpdatedTime() {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const lastUpdateEl = document.getElementById('lastUpdateTime');
-        if (lastUpdateEl) {
-            lastUpdateEl.textContent = timeStr;
-        }
+    function getAdminUserId() {
+        return localStorage.getItem('admin_user_id') || null;
     }
 
     /**
-     * STAFF INFORMATION MANAGEMENT
+     * Fetches assignment IDs for adminUserId from the API.
+     * On any error (network, 404, empty response) it falls back gracefully:
+     *   - tenantFilterReady stays false → isValidAssignment() keeps returning true
+     *   - All Firebase data continues to be displayed (unfiltered)
      */
-    window.initStaffInfo = function() {
-        console.log("Initializing staff information...");
+    function loadAdminAssignments(adminUserId, callback) {
+        if (!adminUserId || adminUserId === '0') {
+            console.warn('[Tenant] No admin_user_id – running unfiltered (show all)');
+            // Do NOT set tenantFilterReady = true here, so everything shows
+            callback(new Set());
+            return;
+        }
 
-        // Try multiple sources in order of priority
-        let staffData = null;
+        const url = `https://cbhms.ucc-bsit.org/LinkApi/get_admin_assignments.php?user_id=${adminUserId}`;
+        console.log('[Tenant] Fetching assignment IDs for admin', adminUserId);
 
-        // 1. Try to get from Android interface
-        if (typeof AndroidApp !== 'undefined') {
-            try {
-                const androidData = AndroidApp.getFullStaffInfo();
-                if (androidData) {
-                    staffData = JSON.parse(androidData);
-                    console.log("Got staff data from Android interface:", staffData);
-
-                    // Store in localStorage for persistence
-                    if (staffData.id) localStorage.setItem('staff_id', staffData.id);
-                    if (staffData.name) localStorage.setItem('staff_name', staffData.name);
-                    if (staffData.role) localStorage.setItem('staff_role', staffData.role);
+        fetch(url)
+            .then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(data => {
+                const ids = new Set();
+                if (data.success && Array.isArray(data.assignment_ids) && data.assignment_ids.length > 0) {
+                    data.assignment_ids.forEach(id => ids.add(String(id)));
+                    tenantFilterReady = true;   // only lock in filter when we have real data
+                    console.log('[Tenant] Filter active – admin', adminUserId, 'assignments:', [...ids]);
+                } else {
+                    // API returned success:false or empty list → show everything
+                    console.warn('[Tenant] API returned no assignments for admin', adminUserId,
+                                 '– running unfiltered. Check get_admin_assignments.php deployment.');
                 }
-            } catch (e) {
-                console.error("Error getting staff data from Android:", e);
-            }
-        }
-
-        // 2. Try localStorage
-        if (!staffData) {
-            const staffId = localStorage.getItem('staff_id');
-            const staffName = localStorage.getItem('staff_name');
-            const staffRole = localStorage.getItem('staff_role');
-
-            if (staffId && staffName) {
-                staffData = {
-                    id: staffId,
-                    name: staffName,
-                    role: staffRole || "Responder"
-                };
-                console.log("Got staff data from localStorage:", staffData);
-            }
-        }
-
-        // 3. Default fallback
-        if (!staffData) {
-            staffData = {
-                id: "STAFF001",
-                name: "Staff Member",
-                role: "Responder"
-            };
-            console.warn("Using default staff data");
-        }
-
-        currentStaff = staffData;
-        console.log("Staff initialized:", currentStaff);
-
-        // Update UI with staff info
-        updateStaffUI();
-
-        // Show toast notification
-        if (currentStaff.id !== "STAFF001") {
-            showToast(`Logged in as ${currentStaff.name} (${currentStaff.role})`, 'success');
-        }
-
-        return currentStaff;
-    };
-
-    function updateStaffUI() {
-        if (!currentStaff) return;
-
-        // Update staff badge only
-        const staffBadge = document.getElementById('staffBadge');
-        if (staffBadge) {
-            staffBadge.style.display = 'block';
-            staffBadge.textContent = `${currentStaff.name} (${currentStaff.role})`;
-        }
+                callback(ids);
+            })
+            .catch(err => {
+                // Network error or endpoint not deployed → show everything
+                console.error('[Tenant] Assignment fetch failed:', err.message,
+                              '– running unfiltered. Deploy get_admin_assignments.php to enable tenant isolation.');
+                callback(new Set());
+            });
     }
 
-    function checkStaffLogin() {
-        if (!currentStaff || currentStaff.id === "STAFF001") {
-            console.warn("Staff not properly logged in");
-
-            // Try to re-initialize staff info
-            setTimeout(() => {
-                window.initStaffInfo();
-            }, 1000);
-
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * SOS Tracking System
-     */
-    const sosTrackingSystem = {
-        markAsSOSActive: function(serialNumber, assignmentId) {
-            const key = `${assignmentId}_${serialNumber}`;
-            if (!activeSOSSerials.has(key)) {
-                activeSOSSerials.add(key);
-                acknowledgedSOSSerials.delete(key);
-                resolvedSOSSerials.delete(key);
-                removeTransmitterFromMap(serialNumber);
-                if (onlineDevices > 0) {
-                    onlineDevices--;
-                }
-            }
-        },
-
-        markAsSOSAcknowledged: function(serialNumber, assignmentId) {
-            const key = `${assignmentId}_${serialNumber}`;
-            if (activeSOSSerials.has(key)) {
-                activeSOSSerials.delete(key);
-                acknowledgedSOSSerials.add(key);
-                resolvedSOSSerials.delete(key);
-                sosAckStatus[serialNumber] = {
-                    acknowledged: true,
-                    ackTime: new Date().getTime(),
-                    ackBy: currentStaff,
-                    assignment_id: assignmentId
-                };
-                // Remove from active SOS markers - will be added as acknowledged marker separately
-                removeSOSMarker(serialNumber);
-            }
-        },
-
-        markAsSOSResolved: function(serialNumber, assignmentId) {
-            const key = `${assignmentId}_${serialNumber}`;
-            activeSOSSerials.delete(key);
-            acknowledgedSOSSerials.delete(key);
-            resolvedSOSSerials.add(key);
-            delete sosAckStatus[serialNumber];
-            removeSOSMarker(serialNumber);
-        },
-
-        hasActiveSOS: function(serialNumber, assignmentId) {
-            const key = `${assignmentId}_${serialNumber}`;
-            return activeSOSSerials.has(key);
-        },
-
-        hasAcknowledgedSOS: function(serialNumber, assignmentId) {
-            const key = `${assignmentId}_${serialNumber}`;
-            return acknowledgedSOSSerials.has(key);
-        },
-
-        hasResolvedSOS: function(serialNumber, assignmentId) {
-            const key = `${assignmentId}_${serialNumber}`;
-            return resolvedSOSSerials.has(key);
-        },
-
-        getActiveSOSCount: function() {
-            return activeSOSSerials.size;
-        },
-
-        getAcknowledgedSOSCount: function() {
-            return acknowledgedSOSSerials.size;
-        },
-
-        getResolvedSOSCount: function() {
-            return resolvedSOSSerials.size;
-        },
-
-        getActiveSOSDevices: function() {
-            return Array.from(activeSOSSerials);
-        },
-
-        getAcknowledgedSOSDevices: function() {
-            return Array.from(acknowledgedSOSSerials);
-        },
-
-        clearAllSOS: function() {
-            activeSOSSerials.clear();
-            acknowledgedSOSSerials.clear();
-            resolvedSOSSerials.clear();
-            sosAckStatus = {};
-        }
-    };
-
-    function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return String(text).replace(/[&<>"']/g, m => map[m]);
-    }
-
-    function getRSSIGrade(rssi) {
-        if (rssi === null || rssi === undefined) return { grade: 'N/A', class: '', color: '#999' };
-
-        const value = parseInt(rssi);
-        if (value >= -50) {
-            return { grade: 'Excellent', class: 'signal-excellent', color: '#4CAF50' };
-        } else if (value >= -60) {
-            return { grade: 'Good', class: 'signal-good', color: '#8BC34A' };
-        } else if (value >= -70) {
-            return { grade: 'Fair', class: 'signal-fair', color: '#FFC107' };
-        } else if (value >= -80) {
-            return { grade: 'Weak', class: 'signal-weak', color: '#FF9800' };
-        } else if (value >= -90) {
-            return { grade: 'Bad', class: 'signal-bad', color: '#F44336' };
+    function updateTenantBadge() {
+        const badge = document.getElementById('tenantBadge');
+        if (!badge) return;
+        if (currentStaff && adminUserIdForFilter) {
+            badge.style.display = 'block';
+            badge.textContent = `${currentStaff.name} (${currentStaff.role || 'Staff'}) · Admin #${adminUserIdForFilter}`;
         } else {
-            return { grade: 'Very Bad', class: 'signal-bad', color: '#F44336' };
+            badge.style.display = 'none';
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  MAP INITIALIZATION
+    // ═══════════════════════════════════════════════════════════════════════════
 
     function initMap() {
-        // Set initial view to Manila coordinates
         map = L.map('map', { zoomControl: false }).setView([14.5995, 120.9842], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1357,72 +821,377 @@
         });
         map.addLayer(markerCluster);
 
-        // Initialize Firebase listeners (legend stats will be updated via these)
-        initializeFirebaseListeners();
-
-        // Initialize staff info
-        window.initStaffInfo();
-
         isMapInitialized = true;
 
-        // Notify Android that map is ready
+        // Start Firebase connection watcher. Listeners will attach once connected.
+        initializeFirebase();
+
+        if (typeof AndroidApp !== 'undefined') {
+            try { AndroidApp.onMapReady(); } catch (e) { /* ignore */ }
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  STAFF / TENANT INITIALIZATION
+    //  Called by Android (injectStaffData) every time the fragment resumes.
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    window.initStaffInfo = function() {
+        console.log('[Staff] Initializing staff info…');
+        let staffData = null;
+
+        // 1. Try Android bridge
         if (typeof AndroidApp !== 'undefined') {
             try {
-                AndroidApp.onMapReady();
+                const raw = AndroidApp.getFullStaffInfo();
+                if (raw) {
+                    staffData = JSON.parse(raw);
+                    console.log('[Staff] Got staff data from Android:', staffData);
+                    if (staffData.id)          localStorage.setItem('staff_id',      staffData.id);
+                    if (staffData.name)        localStorage.setItem('staff_name',    staffData.name);
+                    if (staffData.role)        localStorage.setItem('staff_role',    staffData.role);
+                    if (staffData.adminUserId) localStorage.setItem('admin_user_id', staffData.adminUserId);
+                }
             } catch (e) {
-                console.log("Android interface not fully available");
+                console.error('[Staff] Error getting staff data from Android:', e);
             }
         }
-    }
 
-    function makeLegendDraggable(legendElement) {
-        const header = legendElement.querySelector('h4');
+        // 2. Fallback to localStorage (injected by MapFragment.injectStaffData)
+        if (!staffData) {
+            const staffId   = localStorage.getItem('staff_id');
+            const staffName = localStorage.getItem('staff_name');
+            const staffRole = localStorage.getItem('staff_role');
+            const adminId   = localStorage.getItem('admin_user_id');
+            if (staffId && staffName) {
+                staffData = { id: staffId, name: staffName, role: staffRole || 'Responder', adminUserId: adminId };
+                console.log('[Staff] Got staff data from localStorage:', staffData);
+            }
+        }
 
-        header.addEventListener('mousedown', (e) => {
-            isDraggingLegend = true;
-            dragOffset.x = e.clientX - legendElement.offsetLeft;
-            dragOffset.y = e.clientY - legendElement.offsetTop;
+        // 3. Hard fallback
+        if (!staffData) {
+            staffData = { id: 'STAFF001', name: 'Staff Member', role: 'Responder', adminUserId: null };
+            console.warn('[Staff] Using default staff data');
+        }
 
-            document.addEventListener('mousemove', dragLegend);
-            document.addEventListener('mouseup', stopDraggingLegend);
+        currentStaff = staffData;
+
+        // Resolve admin ID
+        const rawAdminId = staffData.adminUserId || localStorage.getItem('admin_user_id');
+        const newAdminId = (rawAdminId && rawAdminId !== '0') ? String(rawAdminId) : null;
+
+        if (newAdminId && newAdminId !== adminUserIdForFilter) {
+            // Admin identity changed – reload everything scoped to the new admin
+            console.log('[Tenant] Admin user ID resolved to', newAdminId);
+            adminUserIdForFilter = newAdminId;
+
+            // If listeners aren't up yet, just update the admin ID – the Firebase
+            // connection callback will call attachListeners() when ready.
+            // If listeners ARE already up, tear down and reattach with new scope.
+            if (listenersAttached) {
+                console.log('[Tenant] Admin changed – reattaching listeners');
+                detachAndReattach();
+            }
+            // else: attachListeners() will be called once Firebase connects
+        } else if (!listenersAttached) {
+            // Admin ID unchanged but listeners not attached yet (e.g. page just loaded
+            // and Firebase connected before Android injected the admin ID)
+            attachListeners();
+        }
+
+        updateTenantBadge();
+
+        if (currentStaff.id !== 'STAFF001') {
+            showToast(`Logged in as ${currentStaff.name} (${currentStaff.role})`, 'success');
+        }
+
+        return currentStaff;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  FIREBASE LIFECYCLE
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function initializeFirebase() {
+        console.log('[Firebase] Initializing…');
+        updateFirebaseStatus(false);
+
+        database.ref('.info/connected').on('value', (snapshot) => {
+            const connected = snapshot.val();
+            updateFirebaseStatus(connected);
+            console.log('[Firebase] Connected:', connected);
+
+            if (connected && !listenersAttached) {
+                attachListeners();
+            }
         });
-
-        function dragLegend(e) {
-            if (!isDraggingLegend) return;
-
-            const mapContainer = document.getElementById('map');
-            const newLeft = e.clientX - dragOffset.x;
-            const newTop = e.clientY - dragOffset.y;
-
-            const maxLeft = mapContainer.offsetWidth - legendElement.offsetWidth - 10;
-            const maxTop = mapContainer.offsetHeight - legendElement.offsetHeight - 10;
-
-            legendElement.style.left = Math.max(10, Math.min(newLeft, maxLeft)) + 'px';
-            legendElement.style.top = Math.max(10, Math.min(newTop, maxTop)) + 'px';
-        }
-
-        function stopDraggingLegend() {
-            isDraggingLegend = false;
-            document.removeEventListener('mousemove', dragLegend);
-            document.removeEventListener('mouseup', stopDraggingLegend);
-        }
     }
 
-    window.MapFunctions.updateUserLocation = function(latitude, longitude) {
+    /**
+     * Loads assignment IDs for the current admin (or uses empty set / fail-open),
+     * then attaches the devices and sos_alerts real-time listeners.
+     * Safe to call multiple times – guarded by listenersAttached flag.
+     */
+    function attachListeners() {
+        if (listenersAttached) return;
+
+        const adminId = adminUserIdForFilter || getAdminUserId();
+        console.log('[Firebase] Attaching listeners, admin_user_id =', adminId || 'none (unfiltered)');
+
+        // Load assignments first, then start listening
+        loadAdminAssignments(adminId, (ids) => {
+            validAssignmentIds = ids;
+            listenersAttached  = true;
+            setupRealTimeListeners();
+        });
+    }
+
+    /**
+     * Tears down existing listeners, resets state, and reattaches with the
+     * current adminUserIdForFilter.  Called when the admin identity changes.
+     */
+    function detachAndReattach() {
+        database.ref('devices').off();
+        database.ref('sos_alerts').off();
+        listenersAttached = false;
+        tenantFilterReady = false;
+        validAssignmentIds = new Set();
+
+        // Clear map
+        Object.keys(transmitterMarkers).forEach(s => removeTransmitterFromMap(s));
+        Object.keys(activeSOSAlerts).forEach(k => { if (map) map.removeLayer(activeSOSAlerts[k]); delete activeSOSAlerts[k]; });
+        Object.keys(acknowledgedMarkers).forEach(k => { if (map) map.removeLayer(acknowledgedMarkers[k]); delete acknowledgedMarkers[k]; });
+        activeSOSSerials.clear();
+        acknowledgedSOSSerials.clear();
+        resolvedSOSSerials.clear();
+        sosAckStatus         = {};
+        onlineDevices        = 0;
+        sosAlerts            = 0;
+        acknowledgedSOSCount = 0;
+        updateCounts();
+
+        console.log('[Firebase] Listeners detached, reattaching…');
+        attachListeners();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  REAL-TIME LISTENERS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    function setupRealTimeListeners() {
         if (!map || !isMapInitialized) {
-            console.error('[v0] Map not initialized yet');
+            console.warn('[Firebase] Map not ready, retrying in 500ms');
+            listenersAttached = false;  // allow retry
+            setTimeout(attachListeners, 500);
             return;
         }
 
-        if (userLocationMarker) {
-            map.removeLayer(userLocationMarker);
+        console.log('[Firebase] Listeners active. Filter ready:', tenantFilterReady,
+                    'Valid assignments:', tenantFilterReady ? [...validAssignmentIds] : 'ALL (unfiltered)');
+
+        // ── DEVICES ───────────────────────────────────────────────────────────
+        database.ref('devices').on('value', (snapshot) => {
+            const allAssignments = snapshot.val() || {};
+            onlineDevices = 0;
+            totalDevices  = 0;
+
+            Object.keys(transmitterMarkers).forEach(s => removeTransmitterFromMap(s));
+
+            Object.keys(allAssignments).forEach(assignmentId => {
+                if (!isValidAssignment(assignmentId)) return;   // TENANT FILTER (fail-open)
+
+                const devices = allAssignments[assignmentId] || {};
+                Object.keys(devices).forEach(serialNumber => {
+                    const deviceData = devices[serialNumber];
+                    if (!deviceData || !deviceData.location) return;
+
+                    const location = deviceData.location;
+                    const key      = `${assignmentId}_${serialNumber}`;
+                    totalDevices++;
+
+                    if (location.status === 'online' && location.latitude && location.longitude) {
+                        const inSOS      = activeSOSSerials.has(key);
+                        const inAck      = acknowledgedSOSSerials.has(key);
+                        const inResolved = resolvedSOSSerials.has(key);
+
+                        if (!inSOS && !inAck && !inResolved) {
+                            onlineDevices++;
+                            updateTransmitterOnMap(serialNumber, location, assignmentId, deviceData);
+                        } else {
+                            removeTransmitterFromMap(serialNumber);
+                        }
+                    } else {
+                        removeTransmitterFromMap(serialNumber);
+                    }
+                });
+            });
+
+            console.log(`[Devices] Online=${onlineDevices} Total=${totalDevices}`);
+            updateCounts();
+        });
+
+        // ── SOS ALERTS ────────────────────────────────────────────────────────
+        database.ref('sos_alerts').on('value', (snapshot) => {
+            const allAssignments = snapshot.val() || {};
+            sosAlerts = 0;
+
+            Object.keys(activeSOSAlerts).forEach(k => { if (map) map.removeLayer(activeSOSAlerts[k]); delete activeSOSAlerts[k]; });
+            Object.keys(acknowledgedMarkers).forEach(k => { if (map) map.removeLayer(acknowledgedMarkers[k]); delete acknowledgedMarkers[k]; });
+
+            activeSOSSerials.clear();
+            acknowledgedSOSSerials.clear();
+
+            Object.keys(allAssignments).forEach(assignmentId => {
+                if (!isValidAssignment(assignmentId)) return;   // TENANT FILTER (fail-open)
+
+                const alerts = allAssignments[assignmentId] || {};
+                Object.keys(alerts).forEach(serialNumber => {
+                    const alert = alerts[serialNumber];
+                    if (!alert) return;
+                    const key = `${assignmentId}_${serialNumber}`;
+
+                    if (alert.resolved) {
+                        resolvedSOSSerials.add(key);
+                        activeSOSSerials.delete(key);
+                        acknowledgedSOSSerials.delete(key);
+                        removeSOSMarker(serialNumber);
+
+                    } else if (alert.acknowledged) {
+                        acknowledgedSOSSerials.add(key);
+                        activeSOSSerials.delete(key);
+                        resolvedSOSSerials.delete(key);
+                        showAcknowledgedSOSMarker(serialNumber, alert, assignmentId);
+
+                    } else {
+                        sosAlerts++;
+                        activeSOSSerials.add(key);
+                        acknowledgedSOSSerials.delete(key);
+                        resolvedSOSSerials.delete(key);
+                        handleSOSAlert(alert, assignmentId);
+                    }
+                });
+            });
+
+            updateCounts();
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  BASE STATION MARKERS  (called from Android)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    window.MapFunctions.addBaseStationMarkers = function(baseStationsArray) {
+        if (!Array.isArray(baseStationsArray)) {
+            console.error('[BaseStation] Expected array');
+            return;
         }
+        console.log(`[BaseStation] Rendering ${baseStationsArray.length} station(s)`);
+
+        Object.values(geofenceCircles).forEach(c => { if (map) map.removeLayer(c); });
+        geofenceCircles = {};
+
+        baseStationsArray.forEach(station => {
+            try {
+                const { id, station_name, latitude, longitude, status, address, altitude, geofence_radius_m } = station;
+
+                if (!latitude || !longitude || (latitude === 0 && longitude === 0)) {
+                    console.warn('[BaseStation] Invalid coords for:', station_name);
+                    return;
+                }
+
+                const stationId = String(id);
+
+                if (baseStations[stationId]) {
+                    if (baseStations[stationId].marker) {
+                        baseStations[stationId].marker.setLatLng([latitude, longitude]);
+                        baseStations[stationId].marker.getPopup().setContent(buildStationPopup(station));
+                    }
+                    if (geofenceCircles[stationId] && map) map.removeLayer(geofenceCircles[stationId]);
+                    if (geofence_radius_m > 0) addGeofenceCircle(stationId, latitude, longitude, geofence_radius_m);
+                    return;
+                }
+
+                const icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="background-color:#64748b;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>`,
+                    iconSize: [14, 14], iconAnchor: [7, 7]
+                });
+
+                const marker = L.marker([latitude, longitude], { icon }).bindPopup(buildStationPopup(station));
+                markerCluster.addLayer(marker);
+
+                if (geofence_radius_m > 0) addGeofenceCircle(stationId, latitude, longitude, geofence_radius_m);
+
+                baseStations[stationId] = { marker, data: station };
+                console.log(`[BaseStation] Added: "${station_name}" geofence=${geofence_radius_m}m`);
+
+            } catch (err) {
+                console.error('[BaseStation] Error:', err);
+            }
+        });
+    };
+
+    window.MapFunctions.zoomToAlert = function(latitude, longitude, serial, alertType, name) {
+        if (!map || !isMapInitialized) { console.warn('[zoomToAlert] Map not ready'); return; }
+
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        map.setView([lat, lng], 17, { animate: true });
+
+        let found = false;
+        if (activeSOSAlerts[`sos_${serial}`])          { activeSOSAlerts[`sos_${serial}`].openPopup();          found = true; }
+        if (!found && acknowledgedMarkers[`ack_${serial}`]) { acknowledgedMarkers[`ack_${serial}`].openPopup(); found = true; }
+        if (!found && transmitterMarkers[serial]) {
+            markerCluster.zoomToShowLayer(transmitterMarkers[serial], () => transmitterMarkers[serial].openPopup());
+            found = true;
+        }
+
+        const label = alertType === 'geofence' ? '⚠️ Geofence Alert' : '🚨 SOS Alert';
+        showToast(`${label}${name ? ': ' + name : ''}${serial ? ' (' + serial + ')' : ''}`,
+                  alertType === 'geofence' ? 'warning' : 'error');
+    };
+
+    function buildStationPopup(s) {
+        return `
+            <div class="modern-popup">
+                <h4>${escapeHtml(s.station_name || 'Base Station')}</h4>
+                <p><strong>Status:</strong>
+                    <span class="badge ${s.status === 'online' ? 'online' : 'offline'}">${s.status || 'Unknown'}</span>
+                </p>
+                <p><strong>Latitude:</strong>  <span class="value">${parseFloat(s.latitude).toFixed(6)}</span></p>
+                <p><strong>Longitude:</strong> <span class="value">${parseFloat(s.longitude).toFixed(6)}</span></p>
+                ${s.address ? `<p><strong>Address:</strong> <span class="value">${escapeHtml(s.address)}</span></p>` : ''}
+                ${s.altitude ? `<p><strong>Altitude:</strong> <span class="value">${s.altitude}m</span></p>` : ''}
+                ${s.geofence_radius_m ? `<p><strong>Geofence:</strong> <span class="value">${s.geofence_radius_m}m radius</span></p>` : ''}
+                <div class="timestamp">Base station location</div>
+            </div>`;
+    }
+
+    function addGeofenceCircle(stationId, lat, lng, radiusMeters) {
+        if (!map) return;
+        geofenceCircles[stationId] = L.circle([lat, lng], {
+            radius: radiusMeters,
+            color: '#8b5cf6', weight: 2, opacity: 0.6,
+            fillColor: '#8b5cf6', fillOpacity: 0.05,
+            dashArray: '5, 5', className: 'geofence-circle'
+        }).addTo(map);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  USER LOCATION  (called from Android)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    window.MapFunctions.updateUserLocation = function(latitude, longitude) {
+        if (!map || !isMapInitialized) return;
+        if (userLocationMarker) map.removeLayer(userLocationMarker);
 
         const icon = L.divIcon({
             className: 'custom-div-icon',
-            html: `<div style="background-color: #3b82f6; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);"></div>`,
-            iconSize: [12, 12],
-            iconAnchor: [6, 6]
+            html: `<div style="background-color:#3b82f6;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 8px rgba(59,130,246,0.6);"></div>`,
+            iconSize: [12, 12], iconAnchor: [6, 6]
         });
 
         userLocationMarker = L.marker([latitude, longitude], { icon })
@@ -1430,1077 +1199,419 @@
             .bindPopup(`
                 <div class="modern-popup">
                     <h4>Your Location</h4>
-                    <p><strong>Latitude:</strong> <span class="value">${latitude.toFixed(6)}</span></p>
+                    <p><strong>Latitude:</strong>  <span class="value">${latitude.toFixed(6)}</span></p>
                     <p><strong>Longitude:</strong> <span class="value">${longitude.toFixed(6)}</span></p>
-                </div>
-            `);
+                </div>`);
     };
 
-    window.MapFunctions.addBaseStationMarkers = function(baseStationsArray) {
-        if (!Array.isArray(baseStationsArray)) {
-            console.error('Base stations is not an array');
-            return;
-        }
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  TRANSMITTER MARKERS
+    // ═══════════════════════════════════════════════════════════════════════════
 
-        // ─────────────────────────────────────────────────────────────────────────────
-// ADD THIS ENTIRE FUNCTION to map.html, right after the
-// window.MapFunctions.addBaseStationMarkers = function(...) { ... }; block
-// ─────────────────────────────────────────────────────────────────────────────
-
-    window.MapFunctions.zoomToAlert = function(latitude, longitude, serial, alertType, name) {
-        if (!map || !isMapInitialized) {
-            console.warn('[zoomToAlert] Map not ready yet, will be retried by Android');
-            return;
-        }
-
-        var lat = parseFloat(latitude);
-        var lng = parseFloat(longitude);
-
-        if (isNaN(lat) || isNaN(lng)) {
-            console.error('[zoomToAlert] Invalid coordinates:', latitude, longitude);
-            return;
-        }
-
-        console.log('[zoomToAlert] Zooming to', alertType, serial, lat, lng);
-
-        // 1. Fly to the location at a close zoom
-        map.setView([lat, lng], 17, { animate: true });
-
-        // 2. Try to find and open the exact marker for this serial number.
-        //    We check both active SOS markers and acknowledged markers.
-        var markerFound = false;
-
-        // Check active SOS markers  (key format: "sos_<serial>")
-        var sosKey = 'sos_' + serial;
-        if (activeSOSAlerts[sosKey]) {
-            activeSOSAlerts[sosKey].openPopup();
-            markerFound = true;
-            console.log('[zoomToAlert] Opened active SOS popup for', serial);
-        }
-
-        // Check acknowledged markers  (key format: "ack_<serial>")
-        if (!markerFound) {
-            var ackKey = 'ack_' + serial;
-            if (acknowledgedMarkers[ackKey]) {
-                acknowledgedMarkers[ackKey].openPopup();
-                markerFound = true;
-                console.log('[zoomToAlert] Opened acknowledged popup for', serial);
-            }
-        }
-
-        // Check regular transmitter markers (online devices that haven't
-        // fired SOS yet — uncommon but possible for geofence alerts)
-        if (!markerFound && transmitterMarkers[serial]) {
-            // Transmitter markers are inside a cluster; un-cluster first
-            markerCluster.zoomToShowLayer(transmitterMarkers[serial], function() {
-                transmitterMarkers[serial].openPopup();
-            });
-            markerFound = true;
-            console.log('[zoomToAlert] Opened transmitter popup for', serial);
-        }
-
-        if (!markerFound) {
-            console.warn('[zoomToAlert] No marker found for serial', serial,
-                '— map is centred on coordinates but no popup opened.');
-        }
-
-        // 3. Show a Toastify banner so the user knows why the map jumped
-        var label = alertType === 'geofence' ? '⚠️ Geofence Alert' : '🚨 SOS Alert';
-        var toastMsg = label + (name ? ': ' + name : '') + (serial ? ' (' + serial + ')' : '');
-        showToast(toastMsg, alertType === 'geofence' ? 'warning' : 'error');
-    };
-
-
-        console.log(`[Map] Adding ${baseStationsArray.length} base station(s) with geofences`);
-
-        // Clear existing geofence circles
-        Object.values(geofenceCircles).forEach(circle => {
-            if (map) map.removeLayer(circle);
-        });
-        geofenceCircles = {};
-
-        baseStationsArray.forEach(station => {
-            try {
-                const {
-                    id,
-                    station_name,
-                    latitude,
-                    longitude,
-                    status,
-                    address,
-                    altitude,
-                    geofence_radius_m
-                } = station;
-
-                // Validate coordinates
-                if (!latitude || !longitude || latitude === 0 && longitude === 0) {
-                    console.warn(`Invalid coordinates for station: ${station_name}`);
-                    return;
-                }
-
-                const stationId = String(id);
-
-                // Check if station already exists
-                if (baseStations[stationId]) {
-                    console.log(`[Map] Base station ${stationId} already exists, updating...`);
-
-                    // Update existing marker position
-                    if (baseStations[stationId].marker) {
-                        baseStations[stationId].marker.setLatLng([latitude, longitude]);
-
-                        // Update popup content - removed online/total devices
-                        const popupContent = `
-                            <div class="modern-popup">
-                                <h4>${escapeHtml(station_name || 'Base Station')}</h4>
-                                <p><strong>Status:</strong> <span class="badge ${status === 'online' ? 'online' : 'offline'}">${status || 'Unknown'}</span></p>
-                                <p><strong>Latitude:</strong> <span class="value">${parseFloat(latitude).toFixed(6)}</span></p>
-                                <p><strong>Longitude:</strong> <span class="value">${parseFloat(longitude).toFixed(6)}</span></p>
-                                ${address ? `<p><strong>Address:</strong> <span class="value">${escapeHtml(address)}</span></p>` : ''}
-                                ${altitude ? `<p><strong>Altitude:</strong> <span class="value">${altitude}m</span></p>` : ''}
-                                ${geofence_radius_m ? `<p><strong>Geofence:</strong> <span class="value">${geofence_radius_m}m radius</span></p>` : ''}
-                                <div class="timestamp">Base station location</div>
-                            </div>
-                        `;
-                        baseStations[stationId].marker.getPopup().setContent(popupContent);
-                    }
-
-                    // Update geofence circle
-                    if (geofenceCircles[stationId] && map) {
-                        map.removeLayer(geofenceCircles[stationId]);
-                    }
-
-                    // Add geofence circle if radius is provided - simple dashed circle only
-                    if (geofence_radius_m && geofence_radius_m > 0) {
-                        addGeofenceCircle(stationId, latitude, longitude, geofence_radius_m);
-                    }
-
-                    return;
-                }
-
-                // Create new marker with simplified popup (no online/total devices)
-                const icon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div style="background-color: #64748b; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"></div>`,
-                    iconSize: [14, 14],
-                    iconAnchor: [7, 7]
-                });
-
-                const popupContent = `
-                    <div class="modern-popup">
-                        <h4>${escapeHtml(station_name || 'Base Station')}</h4>
-                        <p><strong>Status:</strong> <span class="badge ${status === 'online' ? 'online' : 'offline'}">${status || 'Unknown'}</span></p>
-                        <p><strong>Latitude:</strong> <span class="value">${parseFloat(latitude).toFixed(6)}</span></p>
-                        <p><strong>Longitude:</strong> <span class="value">${parseFloat(longitude).toFixed(6)}</span></p>
-                        ${address ? `<p><strong>Address:</strong> <span class="value">${escapeHtml(address)}</span></p>` : ''}
-                        ${altitude ? `<p><strong>Altitude:</strong> <span class="value">${altitude}m</span></p>` : ''}
-                        ${geofence_radius_m ? `<p><strong>Geofence:</strong> <span class="value">${geofence_radius_m}m radius</span></p>` : ''}
-                        <div class="timestamp">Base station location</div>
-                    </div>
-                `;
-
-                const marker = L.marker([latitude, longitude], { icon })
-                    .bindPopup(popupContent);
-
-                markerCluster.addLayer(marker);
-
-                // Add geofence circle if radius is provided - simple dashed circle only
-                if (geofence_radius_m && geofence_radius_m > 0) {
-                    addGeofenceCircle(stationId, latitude, longitude, geofence_radius_m);
-                }
-
-                // Store in tracking object
-                baseStations[stationId] = {
-                    marker: marker,
-                    data: station
-                };
-
-                console.log(`[Map] Added base station: ${station_name} (${stationId}) with geofence radius ${geofence_radius_m || 500}m`);
-
-            } catch (error) {
-                console.error('Error adding marker for station:', error);
-            }
-        });
-    };
-
-    // Function to add geofence circle - simple dashed circle only, no tooltip
-    function addGeofenceCircle(stationId, lat, lng, radiusMeters) {
-        if (!map) return;
-
-        const circle = L.circle([lat, lng], {
-            radius: radiusMeters,
-            color: '#8b5cf6',
-            weight: 2,
-            opacity: 0.6,
-            fillColor: '#8b5cf6',
-            fillOpacity: 0.05,
-            dashArray: '5, 5',
-            className: 'geofence-circle'
-        }).addTo(map);
-
-        geofenceCircles[stationId] = circle;
-    }
-
-    /**
-     * SOS ACKNOWLEDGMENT FUNCTION - WITH STAFF VALIDATION
-     */
-    function acknowledgeSOS(alert) {
-        // Check if staff is properly logged in
-        if (!checkStaffLogin()) {
-            showToast('Please log in as staff to acknowledge SOS alerts', 'error');
-            return;
-        }
-
-        const { transmitter_serial, alert_time, battery_percent, rssi, snr, id, user_id, assignment_id } = alert;
-
-        // Get the button and show processing state
-        const buttons = document.querySelectorAll('.ack-btn');
-        buttons.forEach(btn => {
-            if (btn.textContent.includes('Acknowledge SOS')) {
-                btn.classList.add('processing');
-                btn.disabled = true;
-                btn.textContent = 'Processing...';
-            }
-        });
-
-        const acknowledgedTime = new Date().toISOString();
-
-        // Update Firebase immediately with assignment-based path
-        database.ref(`sos_alerts/${assignment_id}/${transmitter_serial}`).update({
-            acknowledged: true,
-            acknowledged_time: acknowledgedTime,
-            acknowledged_by: currentStaff.id,
-            acknowledged_by_name: currentStaff.name,
-            resolved: false // Ensure resolved is false when acknowledging
-        }).then(() => {
-            console.log(`SOS acknowledged for ${transmitter_serial} (assignment: ${assignment_id}) by ${currentStaff.name}`);
-
-            // Update tracking system
-            sosTrackingSystem.markAsSOSAcknowledged(transmitter_serial, assignment_id);
-
-            // Send to database
-            sendAcknowledgementToDatabase({
-                sos_id: id,
-                transmitter_serial: transmitter_serial,
-                user_id: user_id,
-                assignment_id: assignment_id,
-                acknowledged_by: currentStaff.id,
-                acknowledged_by_name: currentStaff.name,
-                acknowledged_time: acknowledgedTime,
-                alert_data: alert
-            });
-
-            // Update counts immediately
-            updateCounts();
-
-            // Reset button state
-            setTimeout(() => {
-                buttons.forEach(btn => {
-                    btn.classList.remove('processing');
-                    btn.disabled = false;
-                });
-            }, 1000);
-
-        }).catch((error) => {
-            console.error('Error acknowledging SOS:', error);
-            showToast('Failed to acknowledge SOS', 'error');
-
-            // Reset button on error
-            buttons.forEach(btn => {
-                btn.classList.remove('processing');
-                btn.disabled = false;
-                btn.textContent = 'Acknowledge SOS';
-            });
-        });
-    }
-
-    /**
-     * RESOLVE SOS FUNCTION - WITH STAFF VALIDATION
-     */
-    function resolveSOS(serialNumber, assignmentId) {
-        // Check if staff is properly logged in
-        if (!checkStaffLogin()) {
-            showToast('Please log in as staff to resolve SOS alerts', 'error');
-            return;
-        }
-
-        // Get the button and show processing state
-        const buttons = document.querySelectorAll('.resolve-btn');
-        buttons.forEach(btn => {
-            btn.classList.add('processing');
-            btn.disabled = true;
-            btn.textContent = 'Processing...';
-        });
-
-        const resolvedTime = new Date().toISOString();
-
-        // Update Firebase with assignment-based path
-        database.ref(`sos_alerts/${assignmentId}/${serialNumber}`).update({
-            resolved: true,
-            resolved_time: resolvedTime,
-            resolved_by: currentStaff.id,
-            resolved_by_name: currentStaff.name
-        }).then(() => {
-            console.log(`SOS resolved for ${serialNumber} (assignment: ${assignmentId}) by ${currentStaff.name}`);
-
-            // Update tracking system
-            sosTrackingSystem.markAsSOSResolved(serialNumber, assignmentId);
-
-            // Remove marker from map
-            removeSOSMarker(serialNumber);
-
-            // Send to database
-            sendResolutionToDatabase({
-                transmitter_serial: serialNumber,
-                assignment_id: assignmentId,
-                resolved_by: currentStaff.id,
-                resolved_by_name: currentStaff.name,
-                resolved_time: resolvedTime
-            });
-
-            // Update counts immediately
-            updateCounts();
-
-            // Reset button state
-            setTimeout(() => {
-                buttons.forEach(btn => {
-                    btn.classList.remove('processing');
-                    btn.disabled = false;
-                });
-            }, 1000);
-
-        }).catch((error) => {
-            console.error('Error resolving SOS:', error);
-            showToast('Failed to resolve SOS', 'error');
-
-            // Reset button on error
-            buttons.forEach(btn => {
-                btn.classList.remove('processing');
-                btn.disabled = false;
-                btn.textContent = 'Resolve SOS';
-            });
-        });
-    }
-
-    function sendAcknowledgementToDatabase(data) {
-        console.log('📤 Sending ACK payload:', data);
-
-        fetch('https://cbhms.ucc-bsit.org/LinkApi/acknowledge_sos.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(async response => {
-            console.log('📡 HTTP status:', response.status);
-
-            const text = await response.text();
-            console.log('📥 Raw response:', text);
-
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                throw new Error('Invalid JSON from server');
-            }
-        })
-        .then(result => {
-            console.log('✅ Parsed result:', result);
-
-            if (result.success) {
-                showToast(
-                    `SOS from ${data.transmitter_serial} acknowledged by ${currentStaff.name}!`,
-                    'success'
-                );
-
-            } else {
-                console.error('❌ API failure:', result.message);
-                showToast(`DB Error: ${result.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('🔥 Fetch error:', error);
-            showToast(`Network / Parse error: ${error.message}`, 'error');
-        });
-    }
-
-    function sendResolutionToDatabase(data) {
-        fetch('https://cbhms.ucc-bsit.org/LinkApi/resolve_sos.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                console.log('SOS resolved in database:', result);
-                showToast(`SOS for ${data.transmitter_serial} resolved by ${currentStaff.name}!`, 'success');
-            } else {
-                console.error('Database resolution failed:', result.message);
-                showToast('Failed to save resolution to database', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error sending resolution:', error);
-            showToast('Network error when saving resolution', 'error');
-        });
-    }
-
-    function showToast(message, type = 'info') {
-        let backgroundColor;
-        switch(type) {
-            case 'success':
-                backgroundColor = "#198754";
-                break;
-            case 'error':
-                backgroundColor = "#DC3545";
-                break;
-            case 'warning':
-                backgroundColor = "#FFC107";
-                break;
-            default:
-                backgroundColor = "#6C757D";
-        }
-
-        Toastify({
-            text: message,
-            duration: 3000,
-            gravity: "top",
-            position: "right",
-            backgroundColor: backgroundColor,
-            stopOnFocus: true
-        }).showToast();
-    }
-
-    function initializeFirebaseListeners() {
-        console.log('🚀 Initializing Firebase listeners...');
-        updateFirebaseStatus(true);
-
-        // First, check Firebase connection
-        database.ref('.info/connected').on('value', (snapshot) => {
-            const connected = snapshot.val();
-            console.log('📡 Firebase connection status:', connected);
-            updateFirebaseStatus(connected);
-
-            if (connected) {
-                // Load initial data
-                loadInitialData();
-            }
-        });
-    }
-
-    function loadInitialData() {
-        console.log('📡 Loading initial data from Firebase...');
-
-        // Load SOS alerts
-        database.ref('sos_alerts').once('value', (snapshot) => {
-            const assignments = snapshot.val();
-            console.log('📡 SOS alerts structure:', assignments);
-
-            sosAlerts = 0;
-            activeSOSSerials.clear();
-            acknowledgedSOSSerials.clear();
-            resolvedSOSSerials.clear();
-            sosAckStatus = {};
-
-            if (assignments) {
-                console.log('📡 Found SOS assignments:', Object.keys(assignments));
-
-                Object.keys(assignments).forEach(assignmentId => {
-                    const alerts = assignments[assignmentId];
-                    if (alerts) {
-                        console.log(`📡 SOS alerts in ${assignmentId}:`, Object.keys(alerts));
-
-                        Object.keys(alerts).forEach(serialNumber => {
-                            const alert = alerts[serialNumber];
-                            if (alert) {
-                                const key = `${assignmentId}_${serialNumber}`;
-                                console.log(`📡 SOS alert for ${serialNumber}:`, alert);
-
-                                if (alert.resolved) {
-                                    // Mark as resolved
-                                    resolvedSOSSerials.add(key);
-                                    console.log(`🟢 Resolved SOS: ${serialNumber} in ${assignmentId}`);
-                                } else if (alert.acknowledged) {
-                                    // Mark as acknowledged (but not resolved)
-                                    acknowledgedSOSSerials.add(key);
-                                    sosAckStatus[serialNumber] = {
-                                        acknowledged: true,
-                                        ackTime: new Date(alert.acknowledged_time).getTime(),
-                                        ackBy: {
-                                            id: alert.acknowledged_by,
-                                            name: alert.acknowledged_by_name
-                                        },
-                                        assignment_id: assignmentId,
-                                        resolved: false
-                                    };
-                                    console.log(`🟡 Acknowledged SOS: ${serialNumber} in ${assignmentId}`);
-                                } else {
-                                    // Active SOS (not acknowledged, not resolved)
-                                    sosAlerts++;
-                                    activeSOSSerials.add(key);
-                                    sosAckStatus[serialNumber] = {
-                                        acknowledged: false,
-                                        assignment_id: assignmentId
-                                    };
-                                    console.log(`🔴 Active SOS: ${serialNumber} in ${assignmentId}`);
-                                }
-                            }
-                        });
-                    }
-                });
-            } else {
-                console.log('📡 No SOS alerts found');
-            }
-
-            // Start real-time listeners
-            setupRealTimeListeners();
-            updateCounts();
-        }).catch(error => {
-            console.error('❌ Error loading SOS alerts:', error);
-        });
-    }
-
-    function setupRealTimeListeners() {
-        console.log('📡 Setting up real-time listeners...');
-
-        // Listen to ALL assignment groups for devices
-        database.ref('devices').on('value', (snapshot) => {
-            const assignments = snapshot.val();
-            console.log('📡 Received devices update, assignments:', assignments ? Object.keys(assignments) : 'none');
-
-            onlineDevices = 0;
-            totalDevices = 0;
-
-            // Clear all existing markers first
-            Object.keys(transmitterMarkers).forEach(serial => {
-                removeTransmitterFromMap(serial);
-            });
-
-            if (assignments) {
-                console.log('📡 Processing assignments:', Object.keys(assignments));
-
-                Object.keys(assignments).forEach(assignmentId => {
-                    const devices = assignments[assignmentId];
-                    console.log(`📡 Assignment ${assignmentId} has devices:`, devices ? Object.keys(devices) : 'none');
-
-                    if (devices) {
-                        Object.keys(devices).forEach(serialNumber => {
-                            const deviceData = devices[serialNumber];
-                            console.log(`📡 Device ${serialNumber} in ${assignmentId}:`, deviceData);
-
-                            if (deviceData && deviceData.location) {
-                                const location = deviceData.location;
-                                const key = `${assignmentId}_${serialNumber}`;
-
-                                console.log(`📡 Location data for ${serialNumber}:`, location);
-
-                                if (location.status === 'online' && location.latitude && location.longitude) {
-                                    // Check SOS status first
-                                    if (activeSOSSerials.has(key)) {
-                                        console.log(`📡 ${serialNumber} is in active SOS, skipping transmitter marker`);
-                                        removeTransmitterFromMap(serialNumber);
-                                    } else if (acknowledgedSOSSerials.has(key) || resolvedSOSSerials.has(key)) {
-                                        console.log(`📡 ${serialNumber} is in acknowledged/resolved SOS, skipping transmitter marker`);
-                                        removeTransmitterFromMap(serialNumber);
-                                    } else {
-                                        onlineDevices++;
-                                        updateTransmitterOnMap(serialNumber, location, assignmentId, deviceData);
-                                        console.log(`✅ Added transmitter marker for ${serialNumber}`);
-                                    }
-                                } else {
-                                    console.log(`📡 ${serialNumber} not online or missing location, removing marker`);
-                                    removeTransmitterFromMap(serialNumber);
-                                }
-                            } else {
-                                console.log(`📡 ${serialNumber} has no location data in Firebase`);
-                            }
-
-                            totalDevices++;
-                        });
-                    }
-                });
-            } else {
-                console.log('📡 No devices found in any assignment');
-            }
-
-            console.log(`📡 Online devices: ${onlineDevices}, Total devices: ${totalDevices}`);
-            updateCounts();
-        });
-
-        // Listen to ALL assignment groups for SOS alerts
-        database.ref('sos_alerts').on('value', (snapshot) => {
-            const assignments = snapshot.val();
-            sosAlerts = 0;
-
-            // Clear existing SOS markers first
-            Object.keys(activeSOSAlerts).forEach(key => {
-                map.removeLayer(activeSOSAlerts[key]);
-                delete activeSOSAlerts[key];
-            });
-
-            Object.keys(acknowledgedMarkers).forEach(key => {
-                map.removeLayer(acknowledgedMarkers[key]);
-                delete acknowledgedMarkers[key];
-            });
-
-            if (assignments) {
-                Object.keys(assignments).forEach(assignmentId => {
-                    const alerts = assignments[assignmentId];
-                    if (alerts) {
-                        Object.keys(alerts).forEach(serialNumber => {
-                            const alert = alerts[serialNumber];
-                            if (alert) {
-                                const key = `${assignmentId}_${serialNumber}`;
-
-                                // Check resolved status first
-                                if (alert.resolved) {
-                                    // Remove from active and acknowledged, add to resolved
-                                    activeSOSSerials.delete(key);
-                                    acknowledgedSOSSerials.delete(key);
-                                    resolvedSOSSerials.add(key);
-                                    removeSOSMarker(serialNumber);
-                                    console.log(`🟢 SOS resolved: ${serialNumber} in ${assignmentId}`);
-                                } else if (alert.acknowledged) {
-                                    // Move from active to acknowledged
-                                    acknowledgedSOSSerials.add(key);
-                                    activeSOSSerials.delete(key);
-                                    resolvedSOSSerials.delete(key);
-                                    showAcknowledgedSOSMarker(serialNumber, alert, assignmentId);
-                                    console.log(`🟡 SOS acknowledged: ${serialNumber} in ${assignmentId}`);
-                                } else {
-                                    // Active SOS
-                                    sosAlerts++;
-                                    activeSOSSerials.add(key);
-                                    acknowledgedSOSSerials.delete(key);
-                                    resolvedSOSSerials.delete(key);
-                                    handleSOSAlert(alert, assignmentId);
-                                    console.log(`🔴 Active SOS: ${serialNumber} in ${assignmentId}`);
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-
-            updateCounts();
-        });
-    }
-
-    // Transmitter marker function with modern popup styling
     function updateTransmitterOnMap(serialNumber, locationData, assignmentId, deviceData) {
-        const { latitude, longitude, battery_percent, rssi, counter, assigned_name, status, isSos } = locationData;
+        const { latitude, longitude, battery_percent, rssi, counter, assigned_name, isSos } = locationData;
 
-        // Validate coordinates
-        if (!latitude || !longitude || latitude === 0 && longitude === 0) {
-            console.log(`❌ Invalid coordinates for ${serialNumber}: lat=${latitude}, lng=${longitude}`);
-            removeTransmitterFromMap(serialNumber);
-            return;
-        }
-
-        // Don't show SOS devices as regular transmitters
-        if (isSos === true) {
-            console.log(`📡 ${serialNumber} is in SOS mode, not showing as transmitter`);
-            removeTransmitterFromMap(serialNumber);
-            return;
-        }
+        if (!latitude || !longitude || (latitude === 0 && longitude === 0)) { removeTransmitterFromMap(serialNumber); return; }
+        if (isSos === true) { removeTransmitterFromMap(serialNumber); return; }
 
         const signalGrade = getRSSIGrade(rssi);
-        const deviceName = assigned_name || (deviceData && deviceData.assigned_name) || serialNumber;
-
-        console.log(`📍 Updating transmitter ${serialNumber} at ${latitude}, ${longitude}`);
+        const deviceName  = assigned_name || (deviceData && deviceData.assigned_name) || serialNumber;
+        const popupHtml   = buildTransmitterPopup(deviceName, serialNumber, assignmentId, battery_percent, rssi, counter, signalGrade);
 
         if (transmitterMarkers[serialNumber]) {
-            // Update existing marker
             transmitterMarkers[serialNumber].setLatLng([latitude, longitude]);
-            transmitterMarkers[serialNumber].getPopup().setContent(`
-                <div class="modern-popup">
-                    <h4>${escapeHtml(deviceName)}</h4>
-                    <p><strong>Serial:</strong> <span class="value">${serialNumber}</span></p>
-                    <p><strong>Assignment:</strong> <span class="value">${assignmentId}</span></p>
-                    <div class="metrics-grid">
-                        <div class="metric-item">
-                            <div class="metric-label">Battery</div>
-                            <div class="metric-value" style="color: ${battery_percent > 20 ? '#059669' : '#b91c1c'}">${battery_percent || 'N/A'}%</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-label">Signal</div>
-                            <div class="metric-value" style="color: ${signalGrade.color}">${rssi || 'N/A'} dBm</div>
-                        </div>
-                    </div>
-                    <p><strong>Signal Grade:</strong> <span class="value" style="color: ${signalGrade.color}">${signalGrade.grade}</span></p>
-                    <p><strong>Counter:</strong> <span class="value">#${counter || 0}</span></p>
-                    <p><strong>Status:</strong> <span class="badge online">Online</span></p>
-                    <div class="timestamp">Last update: ${new Date().toLocaleTimeString()}</div>
-                </div>
-            `);
+            transmitterMarkers[serialNumber].getPopup().setContent(popupHtml);
         } else {
-            // Create new marker - KEEPING ORIGINAL MARKER STYLE
             const icon = L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div style="background-color: #22d3ee; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                iconSize: [12, 12],
-                iconAnchor: [6, 6]
+                html: `<div style="background-color:#22d3ee;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [12, 12], iconAnchor: [6, 6]
             });
-
-            const marker = L.marker([latitude, longitude], { icon })
-                .bindPopup(`
-                    <div class="modern-popup">
-                        <h4>${escapeHtml(deviceName)}</h4>
-                        <p><strong>Serial:</strong> <span class="value">${serialNumber}</span></p>
-                        <p><strong>Assignment:</strong> <span class="value">${assignmentId}</span></p>
-                        <div class="metrics-grid">
-                            <div class="metric-item">
-                                <div class="metric-label">Battery</div>
-                                <div class="metric-value" style="color: ${battery_percent > 20 ? '#059669' : '#b91c1c'}">${battery_percent || 'N/A'}%</div>
-                            </div>
-                            <div class="metric-item">
-                                <div class="metric-label">Signal</div>
-                                <div class="metric-value" style="color: ${signalGrade.color}">${rssi || 'N/A'} dBm</div>
-                            </div>
-                        </div>
-                        <p><strong>Signal Grade:</strong> <span class="value" style="color: ${signalGrade.color}">${signalGrade.grade}</span></p>
-                        <p><strong>Counter:</strong> <span class="value">#${counter || 0}</span></p>
-                        <p><strong>Status:</strong> <span class="badge online">Online</span></p>
-                        <div class="timestamp">Last update: ${new Date().toLocaleTimeString()}</div>
-                    </div>
-                `);
-
+            const marker = L.marker([latitude, longitude], { icon }).bindPopup(popupHtml);
             transmitterMarkers[serialNumber] = marker;
-
-            // Add to marker cluster instead of directly to map
             markerCluster.addLayer(marker);
-
-            console.log(`✅ Created new marker for ${serialNumber}`);
+            console.log('[Transmitter] Added marker for', serialNumber);
         }
+    }
+
+    function buildTransmitterPopup(name, serial, assignmentId, battery, rssi, counter, signalGrade) {
+        return `
+            <div class="modern-popup">
+                <h4>${escapeHtml(name)}</h4>
+                <p><strong>Serial:</strong>     <span class="value">${serial}</span></p>
+                <p><strong>Assignment:</strong> <span class="value">${assignmentId}</span></p>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">Battery</div>
+                        <div class="metric-value" style="color:${battery > 20 ? '#059669' : '#b91c1c'}">${battery || 'N/A'}%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Signal</div>
+                        <div class="metric-value" style="color:${signalGrade.color}">${rssi || 'N/A'} dBm</div>
+                    </div>
+                </div>
+                <p><strong>Signal Grade:</strong> <span class="value" style="color:${signalGrade.color}">${signalGrade.grade}</span></p>
+                <p><strong>Counter:</strong>  <span class="value">#${counter || 0}</span></p>
+                <p><strong>Status:</strong>   <span class="badge online">Online</span></p>
+                <div class="timestamp">Last update: ${new Date().toLocaleTimeString()}</div>
+            </div>`;
     }
 
     function removeTransmitterFromMap(serialNumber) {
         if (transmitterMarkers[serialNumber]) {
             markerCluster.removeLayer(transmitterMarkers[serialNumber]);
             delete transmitterMarkers[serialNumber];
-            console.log(`🗑️ Removed transmitter marker for ${serialNumber}`);
         }
     }
 
-    // SOS marker function with modern popup styling
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  SOS MARKERS
+    // ═══════════════════════════════════════════════════════════════════════════
+
     function handleSOSAlert(alert, assignmentId) {
-        const { transmitter_serial, acknowledged, resolved } = alert;
-
-        if (acknowledged || resolved) {
-            removeSOSMarker(transmitter_serial);
-            return;
-        }
-
+        if (alert.acknowledged || alert.resolved) { removeSOSMarker(alert.transmitter_serial); return; }
         updateSOSMarker(alert, assignmentId);
         playAlertSound();
     }
 
     function updateSOSMarker(alert, assignmentId) {
-        const { transmitter_serial, latitude, longitude, acknowledged, resolved, rssi, battery_percent, alert_time, snr, assigned_name } = alert;
+        const { transmitter_serial, latitude, longitude, acknowledged, resolved,
+                rssi, battery_percent, alert_time, snr, assigned_name } = alert;
 
-        if (acknowledged || resolved) {
-            removeSOSMarker(transmitter_serial);
-            return;
-        }
+        if (acknowledged || resolved) { removeSOSMarker(transmitter_serial); return; }
 
         const signalGrade = getRSSIGrade(rssi);
-        const markerId = `sos_${transmitter_serial}`;
+        const markerId    = `sos_${transmitter_serial}`;
 
-        // Remove any existing marker for this serial
-        if (activeSOSAlerts[markerId]) {
-            map.removeLayer(activeSOSAlerts[markerId]);
-        }
+        if (activeSOSAlerts[markerId]) map.removeLayer(activeSOSAlerts[markerId]);
+        const ackKey = `ack_${transmitter_serial}`;
+        if (acknowledgedMarkers[ackKey]) { map.removeLayer(acknowledgedMarkers[ackKey]); delete acknowledgedMarkers[ackKey]; }
 
-        if (acknowledgedMarkers[`ack_${transmitter_serial}`]) {
-            map.removeLayer(acknowledgedMarkers[`ack_${transmitter_serial}`]);
-            delete acknowledgedMarkers[`ack_${transmitter_serial}`];
-        }
-
-        // KEEPING ORIGINAL SOS MARKER STYLE
         const icon = L.divIcon({
             className: 'custom-div-icon',
-            html: `<div style="background-color: #F44336; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(244, 67, 54, 0.8); animation: pulse 1s infinite;"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
+            html: `<div style="background-color:#F44336;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(244,67,54,0.8);animation:pulse 1s infinite;"></div>`,
+            iconSize: [16, 16], iconAnchor: [8, 8]
         });
 
-        // Add assignment_id to the alert object
         alert.assignment_id = assignmentId;
+        const alertJson = JSON.stringify(alert).replace(/"/g, '&quot;');
 
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(map)
             .bindPopup(`
                 <div class="modern-popup sos">
-
-                <div class="sos-header">
-                    <span class="badge sos">SOS ACTIVE</span>
-                    <span class="serial">${transmitter_serial}</span>
-                </div>
-
-                    <p><strong>Customer ID:</strong>
-                        <span class="value">${assignmentId}</span>
-                    </p>
-
-                    <p><strong>Customer Name:</strong>
-                        <span class="value">${escapeHtml(assigned_name || 'Unknown')}</span>
-                    </p>
-
-                    <p><strong>Alert Time:</strong>
-                        <span class="value">${new Date(alert_time).toLocaleString()}</span>
-                    </p>
-
-                    <!-- METRICS -->
+                    <div class="sos-header">
+                        <span class="badge sos">SOS ACTIVE</span>
+                        <span class="serial">${transmitter_serial}</span>
+                    </div>
+                    <p><strong>Customer ID:</strong>   <span class="value">${assignmentId}</span></p>
+                    <p><strong>Customer Name:</strong> <span class="value">${escapeHtml(assigned_name || 'Unknown')}</span></p>
+                    <p><strong>Alert Time:</strong>    <span class="value">${new Date(alert_time).toLocaleString()}</span></p>
                     <div class="metrics-grid">
-
                         <div class="metric-item">
                             <div class="metric-label">Battery</div>
-                            <div class="metric-value battery ${battery_percent > 20 ? 'good' : 'low'}">
-                                ${battery_percent || 'N/A'}%
-                            </div>
+                            <div class="metric-value" style="color:${battery_percent > 20 ? '#059669' : '#b91c1c'}">${battery_percent || 'N/A'}%</div>
                         </div>
-
                         <div class="metric-item">
                             <div class="metric-label">Signal</div>
-                            <div class="metric-value" style="color:${signalGrade.color}">
-                                ${rssi || 'N/A'} dBm
-                            </div>
+                            <div class="metric-value" style="color:${signalGrade.color}">${rssi || 'N/A'} dBm</div>
                         </div>
-
                     </div>
-
-                    <p><strong>SNR:</strong>
-                        <span class="value">${snr || 'N/A'}</span>
-                    </p>
-
-                    <button class="ack-btn"
-                        onclick="acknowledgeSOS(${JSON.stringify(alert).replace(/"/g, '&quot;')})">
-                        Acknowledge SOS
-                    </button>
-
-                </div>
-                `);
+                    <p><strong>SNR:</strong> <span class="value">${snr || 'N/A'}</span></p>
+                    <button class="ack-btn" onclick="acknowledgeSOS(${alertJson})">Acknowledge SOS</button>
+                </div>`);
 
         activeSOSAlerts[markerId] = marker;
-
-        // Center map on new SOS
         map.setView([latitude, longitude], 16);
         marker.openPopup();
     }
 
-    // Acknowledged SOS marker function with modern popup styling
     function showAcknowledgedSOSMarker(serialNumber, alert, assignmentId) {
-        const markerId = `ack_${serialNumber}`; // Different prefix for acknowledged markers
+        const markerId = `ack_${serialNumber}`;
 
-        // Remove any existing marker for this serial
-        if (activeSOSAlerts[`sos_${serialNumber}`]) {
-            map.removeLayer(activeSOSAlerts[`sos_${serialNumber}`]);
-            delete activeSOSAlerts[`sos_${serialNumber}`];
-        }
+        const sosKey = `sos_${serialNumber}`;
+        if (activeSOSAlerts[sosKey])       { map.removeLayer(activeSOSAlerts[sosKey]);       delete activeSOSAlerts[sosKey]; }
+        if (acknowledgedMarkers[markerId]) { map.removeLayer(acknowledgedMarkers[markerId]); }
 
-        if (acknowledgedMarkers[markerId]) {
-            map.removeLayer(acknowledgedMarkers[markerId]);
-        }
+        if (!alert || !alert.latitude || !alert.longitude) return;
+        if (alert.resolved) { removeSOSMarker(serialNumber); return; }
 
-        if (!alert || !alert.latitude || !alert.longitude) {
-            console.warn('Invalid alert data for acknowledged SOS:', serialNumber);
-            return;
-        }
+        const { latitude, longitude, rssi, battery_percent, assigned_name,
+                alert_time, acknowledged_time, acknowledged_by, acknowledged_by_name, snr } = alert;
 
-        const { latitude, longitude, rssi, battery_percent, assigned_name, alert_time, acknowledged_time, acknowledged_by, acknowledged_by_name, snr, resolved } = alert;
+        const signalGrade    = getRSSIGrade(rssi);
+        const showResolveBtn = currentStaff && String(currentStaff.id) === String(acknowledged_by);
 
-        // Don't show if already resolved
-        if (resolved) {
-            removeSOSMarker(serialNumber);
-            return;
-        }
-
-        const signalGrade = getRSSIGrade(rssi);
-
-        // KEEPING ORIGINAL ACKNOWLEDGED MARKER STYLE
         const icon = L.divIcon({
             className: 'custom-div-icon',
-            html: `<div style="background-color: #FF9800; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
+            html: `<div style="background-color:#FF9800;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(255,152,0,0.6);"></div>`,
+            iconSize: [16, 16], iconAnchor: [8, 8]
         });
-
-        // Only show resolve button if current staff is the one who acknowledged it
-        const showResolveButton = currentStaff && currentStaff.id === acknowledged_by;
-
-        const popupContent = `
-            <div class="modern-popup acknowledged">
-
-                <!-- FLEX HEADER -->
-                <div class="ack-header">
-                    <span class="badge acknowledged">SOS ACKNOWLEDGED</span>
-                    <span class="serial">${serialNumber}</span>
-                </div>
-
-                <p><strong>Customer ID:</strong>
-                    <span class="value">${assignmentId}</span>
-                </p>
-
-                <p><strong>Customer Name:</strong>
-                    <span class="value">${escapeHtml(assigned_name || 'Unknown')}</span>
-                </p>
-
-                <p><strong>Alert Time:</strong>
-                    <span class="value">${new Date(alert_time).toLocaleString()}</span>
-                </p>
-
-                <!-- ACK INFO -->
-                <div class="ack-info">
-                    <p><strong>Staff Name:</strong>
-                        ${escapeHtml(acknowledged_by_name || acknowledged_by || 'Staff')}
-                    </p>
-                    <p><strong>Time:</strong>
-                        ${new Date(acknowledged_time).toLocaleString()}
-                    </p>
-                </div>
-
-                <!-- METRICS -->
-                <div class="metrics-grid">
-                    <div class="metric-item">
-                        <div class="metric-label">Battery</div>
-                        <div class="metric-value ${battery_percent > 20 ? 'good' : 'low'}">
-                            ${battery_percent || 'N/A'}%
-                        </div>
-                    </div>
-
-                    <div class="metric-item">
-                        <div class="metric-label">Signal</div>
-                        <div class="metric-value" style="color:${signalGrade.color}">
-                            ${rssi || 'N/A'} dBm
-                        </div>
-                    </div>
-                </div>
-
-                <p><strong>SNR:</strong>
-                    <span class="value">${snr || 'N/A'}</span>
-                </p>
-
-                ${
-                    showResolveButton
-                    ? `<button class="resolve-btn" onclick="resolveSOS('${serialNumber}', '${assignmentId}')">Resolve SOS</button>`
-                    : `<p class="resolve-note"><em>Only the acknowledging responder can resolve this SOS</em></p>`
-                }
-
-            </div>
-        `;
 
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(map)
-            .bindPopup(popupContent);
+            .bindPopup(`
+                <div class="modern-popup acknowledged">
+                    <div class="ack-header">
+                        <span class="badge acknowledged">SOS ACKNOWLEDGED</span>
+                        <span class="serial">${serialNumber}</span>
+                    </div>
+                    <p><strong>Customer ID:</strong>   <span class="value">${assignmentId}</span></p>
+                    <p><strong>Customer Name:</strong> <span class="value">${escapeHtml(assigned_name || 'Unknown')}</span></p>
+                    <p><strong>Alert Time:</strong>    <span class="value">${new Date(alert_time).toLocaleString()}</span></p>
+                    <div class="ack-info">
+                        <p><strong>Staff Name:</strong> ${escapeHtml(acknowledged_by_name || acknowledged_by || 'Staff')}</p>
+                        <p><strong>Time:</strong> ${new Date(acknowledged_time).toLocaleString()}</p>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Battery</div>
+                            <div class="metric-value" style="color:${battery_percent > 20 ? '#059669' : '#b91c1c'}">${battery_percent || 'N/A'}%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Signal</div>
+                            <div class="metric-value" style="color:${signalGrade.color}">${rssi || 'N/A'} dBm</div>
+                        </div>
+                    </div>
+                    <p><strong>SNR:</strong> <span class="value">${snr || 'N/A'}</span></p>
+                    ${showResolveBtn
+                        ? `<button class="resolve-btn" onclick="resolveSOS('${serialNumber}','${assignmentId}')">Resolve SOS</button>`
+                        : `<p style="font-size:11px;color:#64748b;text-align:center;margin-top:8px;font-style:italic;">Only the acknowledging responder can resolve this SOS</p>`
+                    }
+                </div>`);
 
         acknowledgedMarkers[markerId] = marker;
     }
 
     function removeSOSMarker(serialNumber) {
-        // Remove from active SOS markers
-        const sosMarkerId = `sos_${serialNumber}`;
-        if (activeSOSAlerts[sosMarkerId]) {
-            map.removeLayer(activeSOSAlerts[sosMarkerId]);
-            delete activeSOSAlerts[sosMarkerId];
-        }
-
-        // Remove from acknowledged markers
-        const ackMarkerId = `ack_${serialNumber}`;
-        if (acknowledgedMarkers[ackMarkerId]) {
-            map.removeLayer(acknowledgedMarkers[ackMarkerId]);
-            delete acknowledgedMarkers[ackMarkerId];
-        }
-
-        console.log(`🗑️ Removed all markers for ${serialNumber}`);
+        const sosId = `sos_${serialNumber}`;
+        const ackId = `ack_${serialNumber}`;
+        if (activeSOSAlerts[sosId])     { map.removeLayer(activeSOSAlerts[sosId]);     delete activeSOSAlerts[sosId]; }
+        if (acknowledgedMarkers[ackId]) { map.removeLayer(acknowledgedMarkers[ackId]); delete acknowledgedMarkers[ackId]; }
     }
 
-    function playAlertSound() {
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  SOS ACTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
 
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+    function acknowledgeSOS(alert) {
+        if (!checkStaffLogin()) { showToast('Please log in as staff to acknowledge SOS alerts', 'error'); return; }
 
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
+        const { transmitter_serial, id, user_id, assignment_id } = alert;
+        const acknowledgedTime = new Date().toISOString();
 
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        const buttons = document.querySelectorAll('.ack-btn');
+        buttons.forEach(btn => { btn.classList.add('processing'); btn.disabled = true; btn.textContent = 'Processing…'; });
 
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-        } catch (e) {
-            console.log('Audio not supported');
-        }
+        database.ref(`sos_alerts/${assignment_id}/${transmitter_serial}`).update({
+            acknowledged:         true,
+            acknowledged_time:    acknowledgedTime,
+            acknowledged_by:      currentStaff.id,
+            acknowledged_by_name: currentStaff.name,
+            resolved:             false
+        }).then(() => {
+            sendAcknowledgementToDatabase({ sos_id: id, transmitter_serial, user_id, assignment_id,
+                acknowledged_by: currentStaff.id, acknowledged_by_name: currentStaff.name,
+                acknowledged_time: acknowledgedTime, alert_data: alert });
+            updateCounts();
+            setTimeout(() => buttons.forEach(btn => { btn.classList.remove('processing'); btn.disabled = false; }), 1000);
+        }).catch(err => {
+            console.error('[SOS] Acknowledge error:', err);
+            showToast('Failed to acknowledge SOS', 'error');
+            buttons.forEach(btn => { btn.classList.remove('processing'); btn.disabled = false; btn.textContent = 'Acknowledge SOS'; });
+        });
     }
+
+    function resolveSOS(serialNumber, assignmentId) {
+        if (!checkStaffLogin()) { showToast('Please log in as staff to resolve SOS alerts', 'error'); return; }
+
+        const resolvedTime = new Date().toISOString();
+        const buttons = document.querySelectorAll('.resolve-btn');
+        buttons.forEach(btn => { btn.classList.add('processing'); btn.disabled = true; btn.textContent = 'Processing…'; });
+
+        database.ref(`sos_alerts/${assignmentId}/${serialNumber}`).update({
+            resolved:         true,
+            resolved_time:    resolvedTime,
+            resolved_by:      currentStaff.id,
+            resolved_by_name: currentStaff.name
+        }).then(() => {
+            sendResolutionToDatabase({ transmitter_serial: serialNumber, assignment_id: assignmentId,
+                resolved_by: currentStaff.id, resolved_by_name: currentStaff.name, resolved_time: resolvedTime });
+            updateCounts();
+            setTimeout(() => buttons.forEach(btn => { btn.classList.remove('processing'); btn.disabled = false; }), 1000);
+        }).catch(err => {
+            console.error('[SOS] Resolve error:', err);
+            showToast('Failed to resolve SOS', 'error');
+            buttons.forEach(btn => { btn.classList.remove('processing'); btn.disabled = false; btn.textContent = 'Resolve SOS'; });
+        });
+    }
+
+    function sendAcknowledgementToDatabase(data) {
+        fetch('https://cbhms.ucc-bsit.org/LinkApi/acknowledge_sos.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(async r => { const text = await r.text(); return JSON.parse(text); })
+        .then(result => {
+            if (result.success) showToast(`SOS from ${data.transmitter_serial} acknowledged by ${currentStaff.name}!`, 'success');
+            else showToast(`DB Error: ${result.message}`, 'error');
+        })
+        .catch(err => showToast(`Network error: ${err.message}`, 'error'));
+    }
+
+    function sendResolutionToDatabase(data) {
+        fetch('https://cbhms.ucc-bsit.org/LinkApi/resolve_sos.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) showToast(`SOS for ${data.transmitter_serial} resolved by ${currentStaff.name}!`, 'success');
+            else showToast('Failed to save resolution to database', 'error');
+        })
+        .catch(err => showToast('Network error when saving resolution', 'error'));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  UI HELPERS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    window.toggleLegendVisibility = function() {
+        const legend   = document.getElementById('mapLegend');
+        const isHidden = legend.classList.contains('hidden-legend');
+        legend.classList.toggle('hidden-legend', !isHidden);
+        localStorage.setItem('legendHidden', isHidden ? 'false' : 'true');
+    };
+
+    function toggleLegend() {
+        const content = document.getElementById('legendContent');
+        if (content) content.classList.toggle('hidden');
+    }
+
+    window.zoomToMarkerType = function(type) {
+        if (!map) return;
+        let bounds = [];
+        if (type === 'transmitter')  Object.values(transmitterMarkers).forEach(m  => { if (m && m.getLatLng) bounds.push(m.getLatLng()); });
+        if (type === 'sos')          Object.values(activeSOSAlerts).forEach(m     => { if (m && m.getLatLng) bounds.push(m.getLatLng()); });
+        if (type === 'acknowledged') Object.values(acknowledgedMarkers).forEach(m => { if (m && m.getLatLng) bounds.push(m.getLatLng()); });
+
+        if (bounds.length > 0) {
+            map.fitBounds(L.featureGroup(bounds.map(ll => L.marker(ll))).getBounds().pad(0.1));
+        } else {
+            showToast(`No ${type} markers found`, 'info');
+        }
+    };
+
+    window.zoomIn  = function() { if (map) map.setZoom(map.getZoom() + 1); };
+    window.zoomOut = function() { if (map) map.setZoom(map.getZoom() - 1); };
 
     function updateCounts() {
-        // Update online devices count in legend
-        const liveCountEl = document.getElementById('liveTransmittersCount');
-        if (liveCountEl) liveCountEl.textContent = onlineDevices;
-
-        // Update active SOS count
-        sosAlerts = activeSOSSerials.size;
-        const sosCountEl = document.getElementById('sosAlertsCount');
-        if (sosCountEl) sosCountEl.textContent = sosAlerts;
-
-        // Update acknowledged SOS count (only those that are acknowledged but not resolved)
+        sosAlerts            = activeSOSSerials.size;
         acknowledgedSOSCount = acknowledgedSOSSerials.size;
-        const ackCountEl = document.getElementById('acknowledgedCount');
-        if (ackCountEl) ackCountEl.textContent = acknowledgedSOSCount;
-
-        // Update last updated time
+        const liveEl = document.getElementById('liveTransmittersCount');
+        const sosEl  = document.getElementById('sosAlertsCount');
+        const ackEl  = document.getElementById('acknowledgedCount');
+        if (liveEl) liveEl.textContent = onlineDevices;
+        if (sosEl)  sosEl.textContent  = sosAlerts;
+        if (ackEl)  ackEl.textContent  = acknowledgedSOSCount;
         updateLastUpdatedTime();
+    }
 
-        console.log(`📊 Stats: Online=${onlineDevices}, Active SOS=${sosAlerts}, Acknowledged=${acknowledgedSOSCount}, Resolved=${resolvedSOSSerials.size}`);
+    function updateLastUpdatedTime() {
+        const el = document.getElementById('lastUpdateTime');
+        if (el) el.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
     function updateFirebaseStatus(connected) {
-        const statusText = document.getElementById('firebaseStatusText');
-        if (statusText) {
-            if (connected) {
-                statusText.innerHTML = '<span class="firebase-connected">● Firebase Connected</span>';
-            } else {
-                statusText.innerHTML = '<span class="firebase-disconnected">● Firebase Disconnected</span>';
-            }
-        }
+        const el = document.getElementById('firebaseStatusText');
+        if (!el) return;
+        el.innerHTML = connected
+            ? '<span class="firebase-connected">● Firebase Connected</span>'
+            : '<span class="firebase-disconnected">● Firebase Disconnected</span>';
     }
 
     window.checkFirebaseStatus = function() {
         return database.ref('.info/connected').once('value').then(snapshot => {
-            const connected = snapshot.val();
-            updateFirebaseStatus(connected);
-            return connected;
+            updateFirebaseStatus(snapshot.val());
+            return snapshot.val();
         });
     };
 
-    // Expose functions to global scope for onclick events
-    window.acknowledgeSOS = acknowledgeSOS;
-    window.resolveSOS = resolveSOS;
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  UTILITY
+    // ═══════════════════════════════════════════════════════════════════════════
 
-    // Add click event listener for buttons
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('ack-btn')) {
-            e.stopPropagation();
+    function escapeHtml(text) {
+        const m = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, c => m[c]);
+    }
+
+    function getRSSIGrade(rssi) {
+        if (rssi === null || rssi === undefined) return { grade: 'N/A', class: '', color: '#999' };
+        const v = parseInt(rssi);
+        if (v >= -50) return { grade: 'Excellent', class: 'signal-excellent', color: '#4CAF50' };
+        if (v >= -60) return { grade: 'Good',      class: 'signal-good',      color: '#8BC34A' };
+        if (v >= -70) return { grade: 'Fair',       class: 'signal-fair',      color: '#FFC107' };
+        if (v >= -80) return { grade: 'Weak',       class: 'signal-weak',      color: '#FF9800' };
+        if (v >= -90) return { grade: 'Bad',        class: 'signal-bad',       color: '#F44336' };
+        return             { grade: 'Very Bad',     class: 'signal-bad',       color: '#F44336' };
+    }
+
+    function checkStaffLogin() {
+        if (!currentStaff || currentStaff.id === 'STAFF001') {
+            setTimeout(() => window.initStaffInfo(), 1000);
+            return false;
         }
-        if (e.target && e.target.classList.contains('resolve-btn')) {
+        return true;
+    }
+
+    function playAlertSound() {
+        try {
+            const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = 800; osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+            osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+        } catch (e) { /* Audio not supported */ }
+    }
+
+    function showToast(message, type = 'info') {
+        const colors = { success: '#198754', error: '#DC3545', warning: '#FFC107', info: '#6C757D' };
+        Toastify({ text: message, duration: 3000, gravity: 'top', position: 'right',
+            backgroundColor: colors[type] || colors.info, stopOnFocus: true }).showToast();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  EXPOSE TO GLOBAL SCOPE
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    window.acknowledgeSOS = acknowledgeSOS;
+    window.resolveSOS     = resolveSOS;
+
+    document.addEventListener('click', function(e) {
+        if (e.target && (e.target.classList.contains('ack-btn') || e.target.classList.contains('resolve-btn'))) {
             e.stopPropagation();
         }
     });
 
-    // Initialize map when DOM is loaded
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  BOOTSTRAP
+    // ═══════════════════════════════════════════════════════════════════════════
+
     document.addEventListener('DOMContentLoaded', initMap);
 
-    // Also try to initialize staff info if Android interface becomes available later
-    window.addEventListener('load', function() {
+    // Fallback: re-init staff info if Android bridge becomes available after load
+    window.addEventListener('load', () => {
         setTimeout(() => {
-            if (!currentStaff) {
+            if (!currentStaff || currentStaff.id === 'STAFF001') {
                 window.initStaffInfo();
             }
-        }, 2000);
+        }, 2500);
     });
 </script>
 </body>

@@ -9,8 +9,9 @@ public class ApiConfig {
     public static final String CHANGE_PASSWORD_URL = BASE_URL + "change_password.php";
 
     // Map & Location
-    public static final String GET_BASE_STATIONS_URL     = BASE_URL + "get_base_stations.php";
-    public static final String UPDATE_STAFF_LOCATION_URL = BASE_URL + "update_staff_location.php";
+    public static final String GET_BASE_STATIONS_URL      = BASE_URL + "get_base_stations.php";
+    public static final String UPDATE_STAFF_LOCATION_URL  = BASE_URL + "update_staff_location.php";
+    public static final String GET_ADMIN_ASSIGNMENTS_URL  = BASE_URL + "get_admin_assignments.php"; // NEW
 
     // Device Management
     public static final String GET_DEVICES_URL       = BASE_URL + "get_devices.php";
@@ -24,7 +25,7 @@ public class ApiConfig {
     // SOS
     public static final String GET_RESOLVED_SOS_URL       = BASE_URL + "get_resolved_sos.php";
     public static final String GET_RESOLVED_SOS_COUNT_URL = BASE_URL + "get_resolved_sos_count.php";
-    public static final String RESOLVE_SOS_BY_QR_URL = BASE_URL + "resolve_sos_by_qr.php";
+    public static final String RESOLVE_SOS_BY_QR_URL      = BASE_URL + "resolve_sos_by_qr.php";
 
     // Profile
     public static final String UPDATE_PROFILE_URL = BASE_URL + "update_profile.php";
